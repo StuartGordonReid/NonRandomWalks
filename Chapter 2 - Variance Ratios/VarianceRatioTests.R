@@ -15,21 +15,53 @@ observedParams <- function(returns) {
 }
 
 
-getMu <- function(X) {
+testCalibration <- function(passes = 30) {
+  mu.avg <- 0.0
+  sd1.avg <- 0.0
+  sd2.avg <- 0.0
+  
+  for (i in 1:passes) {
+    X <- log(priceProcess(t = (252 * 5)))
+    mu.avg <- mu.avg + calibrateMu(X)
+    sd1.avg <- sd1.avg + calibrateSigmaA(X)
+    sd2.avg <- sd2.avg + calibrateSigmaB(X)
+  }
+  
+  print(paste("mu:", mu.avg / passes))
+  print(paste("sd:", sd1.avg / passes))
+  print(paste("sd:", sd2.avg / passes))
+}
+
+
+calibrateMu <- function(X) {
   X <- as.numeric(as.vector(X))
   n <- length(X)
-  mu <- (X[n] - X[1])/n
-  return(mu)
+  mu.est <- (X[n] - X[1])/n
+  return(mu.est)
 }
 
 
-getSigmaA <- function(X) {
+calibrateSigmaA <- function(X) {
+  X <- as.numeric(as.vector(X))
+  mu.est <- getMu(X)
   
+  sd.est <- 0.0
+  n <- length(X)
+  for (t in 2:n)
+    sd.est <- sd.est + (X[t] - X[t - 1] - mu.est)^2
+  return(sd.est / n)
 }
 
 
-getSigmaB <- function(X) {
+calibrateSigmaB <- function(X, mu) {
+  X <- as.numeric(as.vector(X))
+  mu.est <- getMu(X)
   
+  sd.est <- 0.0
+  n <- floor(length(X)/2)
+  for (t in 2:n)
+    sd.est <- sd.est + (X[t * 2] - X[(t * 2) - 2] - (2 * mu.est))^2
+  return(sd.est / (2 * n))
 }
 
 
