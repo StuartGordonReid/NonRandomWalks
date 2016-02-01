@@ -20,8 +20,8 @@ calibrateMu <- function(X, annualize = TRUE) {
 
 
 #' @title Estimate the value of Sigma.
-#' @param Given a log price process, estimate the value of Sigma. Sigma represents the standard deviation of the random
-#' disturbance component of daily returns. This estimate can be annualized by taking the square root of the daily
+#' @description Given a log price process, estimate the value of Sigma. Sigma represents the standard deviation of the 
+#' random disturbance component of daily returns. This estimate can be annualized by taking the square root of the daily
 #' estimate multiplied by 252. This calibration also receives an argument, q, which controls how often prices are
 #' sampled from the log price process for use in the esimation. For example, when q = 1 every price is used but when
 #' q = 4 then every fourth price is used to estimate the value of the sigma.
@@ -30,15 +30,45 @@ calibrateMu <- function(X, annualize = TRUE) {
 #' @param q int :: The sampling interval for the estimator.
 #' @param annualize logical :: Annualize the parameter estimate. True or False.
 #' 
-calibrateSigmaQ <- function(X, q = 1, annualize = TRUE) {
+calibrateSigma <- function(X, q = 1, annualize = TRUE) {
+  mu.est <- calibrateMu(X, annualize = FALSE)
   X <- as.numeric(as.vector(X))
-  mu.est <- getMu(X)
   
   sd.est <- 0.0
   n <- floor(length(X)/q)
+
   for (t in 2:n)
     sd.est <- sd.est + (X[t * q] - X[(t * q) - q] - (q * mu.est))^2
   sd.est <- sd.est / (q * n)
+  
+  if (!annualize) return(sd.est)
+  else return(sqrt((sd.est * 252)))
+}
+
+
+#' @title A more efficient method for estimating the value of Sigma.
+#' @description Given a log price process, estimate the value of Sigma using overlapping intervals. Sigma represents the
+#' standard deviation of the random disturbance component of daily returns. This estimate can be annualized by taking
+#' the square root of the daily estimate multiplied by 252 days. Like the calibrateSigma function, this method receives
+#' the argument q which specifies the sampling interval to be used when estimating sigma. The difference between the 
+#' calibrateSigma method and the calibrateSigmaOverlapping method is that the first uses discrete non-overlapping return
+#' sub-sequences to estimate sigma, whereas the second method uses overlapping sub sequences. This estimator converges 
+#' faster than the calibrateSigma method and has a higher power. In other words, it is more robust.
+#' 
+#' @param X vector :: A log price process.
+#' @param q int :: The sampling interval for the estimator.
+#' @param annualize logical :: Annualize the parameter estimate. True or False.
+#' 
+calibrateSigmaOverlapping <- function(X, q = 1, annualize = TRUE) {
+  mu.est <- calibrateMu(X, annualize = FALSE)
+  X <- as.numeric(as.vector(X))
+  
+  sd.est <- 0.0
+  n <- floor(length(X)/q)
+  
+  for (t in (q + 1):(n * q))
+    sd.est <- sd.est + (X[t] - X[t - q] - (q * mu.est))^2
+  sd.est <- sd.est / (n * (q^2))
   
   if (!annualize) return(sd.est)
   else return(sqrt((sd.est * 252)))
@@ -187,6 +217,7 @@ testCalibration <- function(tries = 30, passes = 300, tau = 0.025) {
     sigma1.est <- 0.0
     sigma2.est <- 0.0
     sigmaq.est <- 0.0
+    sigmaq.overlapping.est <- 0.0
     
     for (i in 1:passes) {
       # Generate a log pricess process with the 
@@ -194,9 +225,10 @@ testCalibration <- function(tries = 30, passes = 300, tau = 0.025) {
       
       # Accumulate the observation variables.
       mu.est <- mu.est + calibrateMu(X)
-      sigma1.est <- sigma1.est + calibrateSigma1(X)
-      sigma2.est <- sigma2.est + calibrateSigma2(X)
-      sigmaq.est <- sigmaq.est + calibrateSigmaQ(X, 4)
+      sigma1.est <- sigma1.est + calibrateSigma(X, 1)
+      sigma2.est <- sigma2.est + calibrateSigma(X, 2)
+      sigmaq.est <- sigmaq.est + calibrateSigma(X, 4)
+      sigmaq.overlapping.est <- sigmaq.overlapping.est + calibrateSigmaOverlapping(X, 4)
     }
     
     # Calculate the estimates.
@@ -204,13 +236,15 @@ testCalibration <- function(tries = 30, passes = 300, tau = 0.025) {
     sigma1.est <- sigma1.est / passes
     sigma2.est <- sigma2.est / passes
     sigmaq.est <- sigmaq.est / passes
+    sigmaq.overlapping.est <- sigmaq.overlapping.est / passes
     
     # Check that the differences are negligable.
     if (!abs(mu.est - mu) < tau) calibratorWarning("mu", mu, mu.est, tau)
     else if (!abs(sigma1.est - sigma) < tau) calibratorWarning("sigma", sigma, sigma1.est, tau)
     else if (!abs(sigma2.est - sigma) < tau) calibratorWarning("sigma", sigma, sigma2.est, tau)
     else if (!abs(sigmaq.est - sigma) < tau) calibratorWarning("sigma", sigma, sigmaq.est, tau)
-    else print(paste(t, "Yay, no warnings! mu:", mu, "><", mu.est, "sigma:", sigma, "><", sigma1.est))
+    else if (!abs(sigmaq.overlapping.est - sigma) < tau) calibratorWarning("sigma", sigma, sigmaq.overlapping.est, tau)
+    else print(paste(t, "Yay, no warnings! mu:", mu, "><", mu.est, "sigma:", sigma, "><", sigmaq.overlapping.est))
   }
 }
 
