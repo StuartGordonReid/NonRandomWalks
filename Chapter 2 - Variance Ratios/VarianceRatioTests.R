@@ -30,7 +30,7 @@ calibrateMu <- function(X, annualize = TRUE) {
 #' @param q int :: The sampling interval for the estimator.
 #' @param annualize logical :: Annualize the parameter estimate. True or False.
 #' 
-calibrateSigma <- function(X, q = 1, annualize = TRUE) {
+calibrateSigma <- function(X, q = 1, annualize = TRUE, unbiased = TRUE) {
   mu.est <- calibrateMu(X, annualize = FALSE)
   X <- as.numeric(as.vector(X))
   
@@ -39,7 +39,11 @@ calibrateSigma <- function(X, q = 1, annualize = TRUE) {
 
   for (t in 2:n)
     sd.est <- sd.est + (X[t * q] - X[(t * q) - q] - (q * mu.est))^2
-  sd.est <- sd.est / (q * n)
+  
+  if (!unbiased)
+    sd.est <- sd.est / (q * n)
+  else 
+    sd.est <- sd.est / (q * n - 1)
   
   if (!annualize) return(sd.est)
   else return(sqrt((sd.est * 252)))
@@ -59,7 +63,7 @@ calibrateSigma <- function(X, q = 1, annualize = TRUE) {
 #' @param q int :: The sampling interval for the estimator.
 #' @param annualize logical :: Annualize the parameter estimate. True or False.
 #' 
-calibrateSigmaOverlapping <- function(X, q = 1, annualize = TRUE) {
+calibrateSigmaOverlapping <- function(X, q = 1, annualize = TRUE, unbiased = TRUE) {
   mu.est <- calibrateMu(X, annualize = FALSE)
   X <- as.numeric(as.vector(X))
   
@@ -68,10 +72,115 @@ calibrateSigmaOverlapping <- function(X, q = 1, annualize = TRUE) {
   
   for (t in (q + 1):(n * q))
     sd.est <- sd.est + (X[t] - X[t - q] - (q * mu.est))^2
-  sd.est <- sd.est / (n * (q^2))
+  
+  if (!unbiased)
+    sd.est <- sd.est / (n * (q^2))
+  else
+    sd.est <- sd.est / ((q * ((n * q) - q + 1)) * (1 - (q / (n * q))))
   
   if (!annualize) return(sd.est)
   else return(sqrt((sd.est * 252)))
+}
+
+
+#' @title Interface to the calibrateMu and calibrateSigmaOverlapping functions.
+#' @description This method returns the estimate parameter values for mu and sigma. These are computed using the 
+#' calibrateMu and calibrateSigmaOverlapping functions. 
+#' 
+#' @param X vector :: A log price process.
+#' @param q int :: The sampling interval for the estimator.
+#' @param annualize logical :: Annualize the parameter estimate. True or False.
+#' 
+calibrate <- function(X, q, annualize = TRUE) {
+  mu.est <- calibrateMu(X)
+  sd.est <- calibrateSigmaOverlapping(X, q)
+  return(list(mu.est, sd.est))
+}
+
+
+jDifferences <- function(X, q, annualize = FALSE, unbiased = TRUE) {
+  sigmaA <- calibrateSigma(X, q = 1, annualize, unbiased)
+  sigmaB <- calibrateSigma(X, q = q, annualize, unbiased)
+  # This statistic should converge to zero.
+  return(sigmaA - sigmaB)
+}
+
+
+jRatio <- function(X, q, annualize = FALSE, unbiased = TRUE) {
+  sigmaA <- calibrateSigma(X, q = 1, annualize, unbiased)
+  sigmaB <- calibrateSigma(X, q = q, annualize, unbiased)
+  # This statistic should converge to zero.
+  return((sigmaA / sigmaB) - 1)
+}
+
+
+mDifferences <- function(X, q, annualize = FALSE, unbiased = TRUE) {
+  sigmaA <- calibrateSigma(X, q = 1, annualize, unbiased)
+  sigmaB <- calibrateSigmaOverlapping(X, q = q, annualize, unbiased)
+  # This statistic should converge to zero.
+  return(sigmaA - sigmaB)
+}
+
+
+mRatio <- function(X, q, annualize = FALSE, unbiased = TRUE) {
+  sigmaA <- calibrateSigma(X, q = 1, annualize, unbiased)
+  sigmaB <- calibrateSigmaOverlapping(X, q = q, annualize, unbiased)
+  # This statistic should converge to zero.
+  return((sigmaA / sigmaB) - 1)
+}
+
+
+calibrateTheta <- function(X, q, j) {
+  mu.est <- calibrateMu(X, FALSE)
+  n <- floor(length(X)/q)
+  
+  numerator <- 0.0
+  # Double check the 2:...
+  for (k in (j + 2):(n * q)) {
+    t1 <- (X[k] - X[k - 1] - mu.est)^2
+    t2 <- (X[k - j] - X[k - j - 1] - mu.est)^2
+    numerator <- numerator + (t1 * t2)
+  }
+  
+  denominator <- 0.0
+  for (k in 2:(n * q))
+    denominator <- denominator + (X[k] - X[k - 1] - mu.est)^2
+  
+  thetaJ <- (n * q * numerator) / (denominator^2)
+  return(thetaJ)
+}
+
+
+asymptoticVariance <- function(X, q) {
+  avar <- 0.0
+  for (j in 1:(q - 1)) {
+    theta <- calibrateTheta(X, q, j)
+    avar <- avar + (2 * (q - j) / q) ^ 2 * theta
+  }
+  return(avar)
+}
+
+
+zTest <- function(X, q) {
+  n <- floor(length(X)/q)
+  z <- sqrt(n * q) * mRatio(X, q)
+  z <- z / sqrt(asymptoticVariance(X, q))
+  return(z)
+}
+
+
+zScatter <- function() {
+  x <- c()
+  for (i in 2:2000) {
+    X <- logPriceProcess(t = (252 * 10), mu = 0.0)
+    for (q in c(2, 4, 8, 16)) {
+      z <- zTest(X, q)
+      x <- c(x, z)
+      
+      print(paste(i, z))
+    }
+  }
+  hist(x)
 }
 
 
@@ -119,7 +228,7 @@ logPriceStep <- function(Xt1, mu, rd, dt = 0.003968254) {
 #' @return X vector :: A simulated log price process.
 #' 
 logPriceProcess <- function(t = 252, X0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma = 0.45, dt = 0.003968254) {
-  X <- rep(0.0, t)
+  X <- rep(X0, t)
   for (ti in 2:t)
     X[ti] <- logPriceStep(X[ti - 1], mu, randomDisturbance(rd.mu, rd.sigma), dt)
   return(X)
@@ -130,8 +239,8 @@ logPriceProcess <- function(t = 252, X0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigm
 #' @description This method exponentiates a log price process and returns it.
 #' @inheritParams logPriceProcess
 #' 
-priceProcess <- function(t = 252, x0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma = 0.45, dt = 0.003968254) {
-  return(exp(logPriceProcess(t, x0, mu, rd.mu, rd.sigma, dt)))
+priceProcess <- function(t = 252, X0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma = 0.45, dt = 0.003968254) {
+  return(exp(logPriceProcess(t, log(X0), mu, rd.mu, rd.sigma, dt)))
 }
 
 
@@ -142,10 +251,10 @@ priceProcess <- function(t = 252, x0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma =
 #' @param n int :: The number of price processes to simulate.
 #' @inheritParams logPriceProcess
 #' 
-priceProcesses <- function(n, t = 252, x0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma = 0.45, dt = 0.003968254) {
-  processes <- xtsProcess(priceProcess(t, x0, mu, rd.mu, rd.sigma, dt), "S1")
+priceProcesses <- function(n, t = 252, X0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma = 0.45, dt = 0.003968254) {
+  processes <- xtsProcess(priceProcess(t, X0, mu, rd.mu, rd.sigma, dt), "S1")
   if (n > 1) for (i in 2:n)
-    processes <- merge.xts(processes, xtsProcess(priceProcess(t, x0, mu, rd.mu, rd.sigma, dt), 
+    processes <- merge.xts(processes, xtsProcess(priceProcess(t, X0, mu, rd.mu, rd.sigma, dt), 
                                                  paste("S", i, sep = '')))
   return(processes)
 }
@@ -155,9 +264,9 @@ priceProcesses <- function(n, t = 252, x0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.si
 #' @description This method constructs an xts object which contains multiple daily return processes as simulated using
 #' the priceProcess function. These price processes are named S1, S2, ... , Sn.
 #' 
-returnProcesses <- function(n, t = 252, x0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma = 0.45, 
+returnProcesses <- function(n, t = 252, X0 = 1.0, mu = 0.1062, rd.mu = 0.0, rd.sigma = 0.45, 
                             dt = 0.003968254, method = "discrete") {
-  prices <- priceProcesses(n, t, x0, mu, rd.mu, rd.sigma, dt)
+  prices <- priceProcesses(n, t, X0, mu, rd.mu, rd.sigma, dt)
   return(Return.calculate(prices, method = method))
 }
 
@@ -255,3 +364,18 @@ calibratorWarning <- function(param, true, estimate, tau) {
   warning(paste("Estimate for", param, ",", estimate, "is further away from the true value for", 
                 param, ",", true, "by more than", tau))
 }
+
+
+example <- function(y, k = 5) {
+  library(vrtest)
+  nob <- length(y)
+  r <- log(y[2:nob])-log(y[1:(nob-1)])
+  
+  print(Lo.Mac(r, k)$Stats[2])
+  print(mRatio(y, k))
+  print(mDifferences(y, k))
+  print(jRatio(y, k))
+  print(jDifferences(y, k))
+}
+
+
