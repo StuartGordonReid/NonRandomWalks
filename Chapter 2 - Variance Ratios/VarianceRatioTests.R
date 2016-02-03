@@ -169,18 +169,25 @@ zTest <- function(X, q) {
 }
 
 
-zScatter <- function() {
+zScatter <- function(samples = 2500) {
   x <- c()
-  for (i in 2:2000) {
-    X <- logPriceProcess(t = (252 * 10), mu = 0.0)
+  for (i in 2:samples) {
+    # Generate a log price process.
+    X <- logPriceProcess(t = (252 * 10), mu = runif(1, min = -0.15, max = 0.15),
+                         rd.sigma = runif(1, min = 0.05, max = 0.75))
+    
     for (q in c(2, 4, 8, 16)) {
       z <- zTest(X, q)
       x <- c(x, z)
-      
-      print(paste(i, z))
     }
+    
+    print(paste("Completed", i, "out of", samples, "samples"))
   }
-  hist(x)
+  
+  model <- hist(x, 100)
+  expected <- hist(rnorm(samples * 4, 0.0), 100)
+  plot(model, col = rgb(0,0,1,1/4), xlim = c(-5, 5))
+  plot(expected, col = rgb(1,0,0,1/4), xlim = c(-5, 5), add=T)
 }
 
 
