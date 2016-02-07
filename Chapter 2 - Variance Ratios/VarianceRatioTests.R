@@ -790,9 +790,96 @@ example <- function(y, k = 5) {
 # ------------------------------------------------------------------------------
 
 
-stockMarketIndices <- function(frequency = "daily") {
+realAssetPriceResults <- function(q, indices, frequency = "daily",
+                                  subset.recent = TRUE, csv.outf = "out.csv") {
   library(Quandl)
   
+  real.zs <- c()
+  sims.zs <- c()
+  lines <- c(paste("Quandl Code, Compute z* Score, Observations Used"))
+  
+  for (index in indices) {
+    if (index != "YAHOO/INDEX_IBEX")
+      raw.data <- Quandl(index, rows = -1, collapse = frequency)
+    else
+      raw.data <- Quandl(index, rows = -1, collapse = frequency,
+                         start_date = "1993-10-03")
+    
+    # Compute the log price process from the Adjusted Close (if available).
+    data = tryCatch({
+      as.numeric(as.vector(log(raw.data$"Adjusted Close")))
+    }, error = function(e) {
+      as.numeric(as.vector(log(raw.data$"Adj Close")))
+    }, error = function(e) {
+      as.numeric(as.vector(log(raw.data$"Close")))
+    })
+    
+    # Just remove any ugly data.
+    data[is.nan(data)] <- NA
+    data[is.infinite(data)] <- NA
+    data <- na.omit(data)
+    
+    if (length(data) >= (252 * 10)) {
+      # Subset the data (run on just the last decade)
+      if (subset.recent)
+        data <- head(data, (252 * 10))
+      
+      # Simulated similar data for dist comparison.
+      mu.est <- calibrateMu(data)
+      sd.est <- calibrateSigmaOverlapping(data)
+      data.sim <- logPriceProcess(t = length(data), 
+                                  mu = mu.est, rd.sigma = sd.est,
+                                  stochastic.volatility = TRUE)
+      
+      # Compute the resulting z*-score.
+      z.score.real <- VRTestZScore(data, q)
+      z.score.simu <- VRTestZScore(data.sim, q)
+      
+      # Add it to the data.
+      real.zs <- c(real.zs, z.score.real)
+      sims.zs <- c(sims.zs, z.score.simu)
+      
+      # Print out the results.
+      line <- paste(index, z.score.real, length(data), sep = ',')
+      lines <- c(lines, line)
+      print(line)
+    }
+  }
+  # Check if the data is normal.
+  checkIfNormalvTwo(real.zs, sims.zs)
+  
+  # Write out the results to CSV.
+  file.out <- file(csv.outf)
+  writeLines(lines, file.out)
+  close(file.out)
+}
+
+
+checkIfNormalvTwo <- function(x, y) {
+  # Plot the density functions.
+  x.density <- density(x)
+  y.density <- density(y)
+  
+  ymax <- max(max(x.density$y), max(y.density$y)) + 0.005
+  xmax <- max(max(x.density$x), max(y.density$x)) + 0.005
+  xmin <- min(min(x.density$x), min(y.density$x)) - 0.005
+  
+  plot(x.density, col = rgb(0,0,1,1/4), 
+       xlim = c(xmin, xmax), ylim = c(0.0, ymax),
+       main = "Comparison of Z* scores for simulated log price processes (Red)
+       against the Z* scores of real stock market indices (Blue)")
+  polygon(x.density, col = rgb(0,0,1,1/4))
+  lines(y.density, col = rgb(1,0,0,1/4))
+  polygon(y.density, col = rgb(1,0,0,1/4))
+  
+  if (length(x) < 5000) {
+    print(shapiro.test(x))
+    print(shapiro.test(y))
+  }
+}
+
+
+getGlobalStockMarketIndices <- function() {
   # List of Global Stock Market Indices / ETFs (where index not available)
   indices <- c("YAHOO/INDEX_DJI", # Dow Jones Industrial (USA)
                "YAHOO/INDEX_GSPC", # S&P 500 Index (USA)
@@ -845,76 +932,516 @@ stockMarketIndices <- function(frequency = "daily") {
                "YAHOO/INDEX_AXJO", # S&P/ASX 200 Index (Australia)
                "YAHOO/INDEX_JKSE", # Jakarta Composite Index (Indonesia)
                "YAHOO/INDEX_STI") # Strait Times Index (Singapore)
-  
-  all.xts <- NULL
-  real.zs <- c()
-  sims.zs <- c()
-  
-  for (index in indices) {
-    # Download raw data from Quandl. Skip certain ugly parts in the data.
-    if (index == "YAHOO/INDEX_BVSP") 
-      raw.data <- Quandl(index, start_date = "1997-05-01", collapse = frequency)
-    else if (index == "YAHOO/INDEX_IBEX")
-      raw.data <- Quandl(index, start_date = "1994-03-01", collapse = frequency)
-    else if (index == "YAHOO/INDEX_OMX")
-      raw.data <- Quandl(index, start_date = "1998-05-27", collapse = frequency)
-    else 
-      raw.data <- Quandl(index, rows = -1, collapse = frequency)
-    
-    # Compute the log price process.
-    data <- as.numeric(as.vector(log(raw.data$Close)))
-    data.xts <- xts(exp(data), order.by = as.POSIXct(raw.data$Date))
-    
-    if (is.null(all.xts)) all.xts <- data.xts
-    else all.xts <- merge.xts(all.xts, data.xts)
-    
-    # Simulated similar data for dist comparison.
-    mu.est <- calibrateMu(data)
-    sd.est <- calibrateSigmaOverlapping(data)
-    data.sim <- logPriceProcess(t = length(data), mu = mu.est, rd.sigma = sd.est,
-                                stochastic.volatility = TRUE)
-    
-    # Compute the resulting z*-score.
-    z.score.real <- VRTestZScore(data, 2)
-    z.score.simu <- VRTestZScore(data.sim, 2)
-    
-    # Add it to the data.
-    real.zs <- c(real.zs, z.score.real)
-    sims.zs <- c(sims.zs, z.score.simu)
-    
-    # Print out the results.
-    print(paste(index, z.score.real, length(data)))
-  }
-  
-  # Check if the data is normal.
-  checkIfNormalvTwo(real.zs, sims.zs)
-  charts.PerformanceSummary(Return.calculate(all.xts))
+  return(indices)
 }
 
 
-checkIfNormalvTwo <- function(x, y) {
-  # Plot the density functions.
-  x.density <- density(x)
-  plot(x.density, col = rgb(0,0,1,1/4), xlim = c(-7, 7), ylim = c(0.0, 0.5), 
-       main = "Comparison of Z* scores for simulated log price processes (Red)
-       against the Z* scores of real stock market indices (Blue)")
-  polygon(x.density, col = rgb(0,0,1,1/4))
-  
-  y.density <- density(y)
-  lines(y.density, col = rgb(1,0,0,1/4), xlim = c(-5, 5))
-  polygon(y.density, col = rgb(1,0,0,1/4))
-  
-  if (length(x) < 5000) {
-    print(shapiro.test(x))
-    print(shapiro.test(y))
-  }
+getSP500Constituents <- function() {
+  sp500 <- c("YAHOO/A",
+             "YAHOO/AA",
+             "YAHOO/AAL",
+             "YAHOO/AAP",
+             "YAHOO/AAPL",
+             "YAHOO/ABBV",
+             "YAHOO/ABC",
+             "YAHOO/ABT",
+             "YAHOO/ACN",
+             "YAHOO/ADBE",
+             "YAHOO/ADI",
+             "YAHOO/ADM",
+             "YAHOO/ADP",
+             "YAHOO/ADS",
+             "YAHOO/ADSK",
+             "YAHOO/ADT",
+             "YAHOO/AEE",
+             "YAHOO/AEP",
+             "YAHOO/AES",
+             "YAHOO/AET",
+             "YAHOO/AFL",
+             # "YAHOO/AGN", Ugly data.
+             "YAHOO/AIG",
+             "YAHOO/AIV",
+             "YAHOO/AIZ",
+             "YAHOO/AKAM",
+             "YAHOO/ALL",
+             "YAHOO/ALLE",
+             "YAHOO/ALXN",
+             "YAHOO/AMAT",
+             "YAHOO/AME",
+             "YAHOO/AMG",
+             "YAHOO/AMGN",
+             "YAHOO/AMP",
+             "YAHOO/AMT",
+             "YAHOO/AMZN",
+             "YAHOO/AN",
+             # "YAHOO/ANTM", Stock not found.
+             "YAHOO/AON",
+             "YAHOO/APA",
+             "YAHOO/APC",
+             "YAHOO/APD",
+             "YAHOO/APH",
+             "YAHOO/ARG",
+             "YAHOO/ATVI",
+             "YAHOO/AVB",
+             "YAHOO/AVGO",
+             "YAHOO/AVY",
+             "YAHOO/AXP",
+             "YAHOO/AZO",
+             "YAHOO/BA",
+             "YAHOO/BAC",
+             "YAHOO/BAX",
+             "YAHOO/BBBY",
+             "YAHOO/BBT",
+             "YAHOO/BBY",
+             "YAHOO/BCR",
+             "YAHOO/BDX",
+             "YAHOO/BEN",
+             "YAHOO/BF_B",
+             "YAHOO/BHI",
+             "YAHOO/BIIB",
+             "YAHOO/BK",
+             "YAHOO/BLK",
+             "YAHOO/BLL",
+             "YAHOO/BMY",
+             "YAHOO/BRK_B",
+             "YAHOO/BSX",
+             "YAHOO/BWA",
+             # "YAHOO/BXLT", Stock not found.
+             "YAHOO/BXP",
+             "YAHOO/C",
+             "YAHOO/CA",
+             "YAHOO/CAG",
+             "YAHOO/CAH",
+             "YAHOO/CAM",
+             "YAHOO/CAT",
+             "YAHOO/CB",
+             "YAHOO/CBG",
+             "YAHOO/CBS",
+             "YAHOO/CCE",
+             "YAHOO/CCI",
+             "YAHOO/CCL",
+             "YAHOO/CELG",
+             "YAHOO/CERN",
+             "YAHOO/CF",
+             # "YAHOO/CFG", Stock not found.
+             "YAHOO/CHD",
+             "YAHOO/CHK",
+             "YAHOO/CHRW",
+             "YAHOO/CI",
+             "YAHOO/CINF",
+             "YAHOO/CL",
+             "YAHOO/CLX",
+             "YAHOO/CMA",
+             "YAHOO/CMCSA",
+             "YAHOO/CME",
+             "YAHOO/CMG",
+             "YAHOO/CMI",
+             "YAHOO/CMS",
+             "YAHOO/CNP",
+             "YAHOO/CNX",
+             "YAHOO/COF",
+             "YAHOO/COG",
+             "YAHOO/COH",
+             "YAHOO/COL",
+             "YAHOO/COP",
+             "YAHOO/COST",
+             "YAHOO/CPB",
+             # "YAHOO/CPGX", Stock not found.
+             "YAHOO/CRM",
+             "YAHOO/CSCO",
+             # "YAHOO/CSRA", Stock not found.
+             "YAHOO/CSX",
+             "YAHOO/CTAS",
+             "YAHOO/CTL",
+             "YAHOO/CTSH",
+             "YAHOO/CTXS",
+             "YAHOO/CVC",
+             "YAHOO/CVS",
+             "YAHOO/CVX",
+             "YAHOO/D",
+             "YAHOO/DAL",
+             "YAHOO/DD",
+             "YAHOO/DE",
+             "YAHOO/DFS",
+             "YAHOO/DG",
+             "YAHOO/DGX",
+             "YAHOO/DHI",
+             "YAHOO/DHR",
+             "YAHOO/DIS",
+             "YAHOO/DISCA",
+             "YAHOO/DISCK",
+             "YAHOO/DLPH",
+             "YAHOO/DLTR",
+             "YAHOO/DNB",
+             "YAHOO/DO",
+             "YAHOO/DOV",
+             "YAHOO/DOW",
+             "YAHOO/DPS",
+             "YAHOO/DRI",
+             "YAHOO/DTE",
+             "YAHOO/DUK",
+             "YAHOO/DVA",
+             "YAHOO/DVN",
+             "YAHOO/EA",
+             "YAHOO/EBAY",
+             "YAHOO/ECL",
+             "YAHOO/ED",
+             "YAHOO/EFX",
+             "YAHOO/EIX",
+             "YAHOO/EL",
+             "YAHOO/EMC",
+             "YAHOO/EMN",
+             "YAHOO/EMR",
+             "YAHOO/ENDP",
+             "YAHOO/EOG",
+             "YAHOO/EQIX",
+             "YAHOO/EQR",
+             "YAHOO/EQT",
+             # "YAHOO/ES", Stock not found.
+             "YAHOO/ESRX",
+             "YAHOO/ESS",
+             "YAHOO/ESV",
+             "YAHOO/ETFC",
+             "YAHOO/ETN",
+             "YAHOO/ETR",
+             "YAHOO/EW",
+             "YAHOO/EXC",
+             "YAHOO/EXPD",
+             "YAHOO/EXPE",
+             "YAHOO/EXR",
+             "YAHOO/F",
+             "YAHOO/FAST",
+             "YAHOO/FB",
+             "YAHOO/FCX",
+             "YAHOO/FDX",
+             "YAHOO/FE",
+             "YAHOO/FFIV",
+             "YAHOO/FIS",
+             "YAHOO/FISV",
+             "YAHOO/FITB",
+             "YAHOO/FLIR",
+             "YAHOO/FLR",
+             "YAHOO/FLS",
+             "YAHOO/FMC",
+             "YAHOO/FOX",
+             "YAHOO/FOXA",
+             "YAHOO/FRT",
+             "YAHOO/FSLR",
+             "YAHOO/FTI",
+             "YAHOO/FTR",
+             "YAHOO/GAS",
+             "YAHOO/GD",
+             "YAHOO/GE",
+             "YAHOO/GGP",
+             "YAHOO/GILD",
+             "YAHOO/GIS",
+             "YAHOO/GLW",
+             "YAHOO/GM",
+             "YAHOO/GMCR",
+             "YAHOO/GME",
+             "YAHOO/GOOG",
+             "YAHOO/GOOGL",
+             "YAHOO/GPC",
+             "YAHOO/GPS",
+             "YAHOO/GRMN",
+             "YAHOO/GS",
+             "YAHOO/GT",
+             "YAHOO/GWW",
+             "YAHOO/HAL",
+             "YAHOO/HAR",
+             "YAHOO/HAS",
+             "YAHOO/HBAN",
+             "YAHOO/HBI",
+             "YAHOO/HCA",
+             "YAHOO/HCN",
+             "YAHOO/HCP",
+             "YAHOO/HD",
+             "YAHOO/HES",
+             "YAHOO/HIG",
+             "YAHOO/HOG",
+             "YAHOO/HON",
+             "YAHOO/HOT",
+             "YAHOO/HP",
+             # "YAHOO/HPE", Stock not found.
+             "YAHOO/HPQ",
+             "YAHOO/HRB",
+             "YAHOO/HRL",
+             "YAHOO/HRS",
+             "YAHOO/HSIC",
+             "YAHOO/HST",
+             "YAHOO/HSY",
+             "YAHOO/HUM",
+             "YAHOO/IBM",
+             "YAHOO/ICE",
+             "YAHOO/IFF",
+             "YAHOO/ILMN",
+             "YAHOO/INTC",
+             "YAHOO/INTU",
+             "YAHOO/IP",
+             "YAHOO/IPG",
+             "YAHOO/IR",
+             "YAHOO/IRM",
+             "YAHOO/ISRG",
+             "YAHOO/ITW",
+             "YAHOO/IVZ",
+             "YAHOO/JBHT",
+             "YAHOO/JCI",
+             "YAHOO/JEC",
+             "YAHOO/JNJ",
+             "YAHOO/JNPR",
+             "YAHOO/JPM",
+             "YAHOO/JWN",
+             "YAHOO/K",
+             "YAHOO/KEY",
+             # "YAHOO/KHC", Stock not found.
+             "YAHOO/KIM",
+             "YAHOO/KLAC",
+             "YAHOO/KMB",
+             "YAHOO/KMI",
+             "YAHOO/KMX",
+             "YAHOO/KO",
+             "YAHOO/KORS",
+             "YAHOO/KR",
+             "YAHOO/KSS",
+             "YAHOO/KSU",
+             "YAHOO/L",
+             "YAHOO/LB",
+             "YAHOO/LEG",
+             "YAHOO/LEN",
+             "YAHOO/LH",
+             "YAHOO/LLL",
+             "YAHOO/LLTC",
+             "YAHOO/LLY",
+             "YAHOO/LM",
+             "YAHOO/LMT",
+             "YAHOO/LNC",
+             "YAHOO/LOW",
+             "YAHOO/LRCX",
+             "YAHOO/LUK",
+             "YAHOO/LUV",
+             "YAHOO/LVLT",
+             "YAHOO/LYB",
+             "YAHOO/M",
+             "YAHOO/MA",
+             "YAHOO/MAC",
+             "YAHOO/MAR",
+             "YAHOO/MAS",
+             "YAHOO/MAT",
+             "YAHOO/MCD",
+             "YAHOO/MCHP",
+             "YAHOO/MCK",
+             "YAHOO/MCO",
+             "YAHOO/MDLZ",
+             "YAHOO/MDT",
+             "YAHOO/MET",
+             "YAHOO/MHFI",
+             "YAHOO/MHK",
+             "YAHOO/MJN",
+             "YAHOO/MKC",
+             "YAHOO/MLM",
+             "YAHOO/MMC",
+             "YAHOO/MMM",
+             "YAHOO/MNK",
+             "YAHOO/MNST",
+             "YAHOO/MO",
+             "YAHOO/MON",
+             "YAHOO/MOS",
+             "YAHOO/MPC",
+             "YAHOO/MRK",
+             "YAHOO/MRO",
+             "YAHOO/MS",
+             "YAHOO/MSFT",
+             "YAHOO/MSI",
+             "YAHOO/MTB",
+             "YAHOO/MU",
+             "YAHOO/MUR",
+             # "YAHOO/MYL", Stock not found.
+             # "YAHOO/NAVI", Stock not found.
+             "YAHOO/NBL",
+             "YAHOO/NDAQ",
+             "YAHOO/NEE",
+             "YAHOO/NEM",
+             "YAHOO/NFLX",
+             "YAHOO/NFX",
+             "YAHOO/NI",
+             "YAHOO/NKE",
+             "YAHOO/NLSN",
+             "YAHOO/NOC",
+             "YAHOO/NOV",
+             "YAHOO/NRG",
+             "YAHOO/NSC",
+             "YAHOO/NTAP",
+             "YAHOO/NTRS",
+             "YAHOO/NUE",
+             "YAHOO/NVDA",
+             "YAHOO/NWL",
+             "YAHOO/NWS",
+             "YAHOO/NWSA",
+             "YAHOO/O",
+             "YAHOO/OI",
+             "YAHOO/OKE",
+             "YAHOO/OMC",
+             "YAHOO/ORCL",
+             "YAHOO/ORLY",
+             "YAHOO/OXY",
+             "YAHOO/PAYX",
+             "YAHOO/PBCT",
+             "YAHOO/PBI",
+             "YAHOO/PCAR",
+             "YAHOO/PCG",
+             "YAHOO/PCL",
+             "YAHOO/PCLN",
+             "YAHOO/PDCO",
+             "YAHOO/PEG",
+             "YAHOO/PEP",
+             "YAHOO/PFE",
+             "YAHOO/PFG",
+             "YAHOO/PG",
+             "YAHOO/PGR",
+             "YAHOO/PH",
+             "YAHOO/PHM",
+             "YAHOO/PKI",
+             "YAHOO/PLD",
+             "YAHOO/PM",
+             "YAHOO/PNC",
+             "YAHOO/PNR",
+             "YAHOO/PNW",
+             "YAHOO/POM",
+             "YAHOO/PPG",
+             "YAHOO/PPL",
+             "YAHOO/PRGO",
+             "YAHOO/PRU",
+             "YAHOO/PSA",
+             "YAHOO/PSX",
+             "YAHOO/PVH",
+             "YAHOO/PWR",
+             "YAHOO/PX",
+             "YAHOO/PXD",
+             # "YAHOO/PYPL", Stock not found.
+             "YAHOO/QCOM",
+             # "YAHOO/QRVO", Stock not found.
+             "YAHOO/R",
+             "YAHOO/RAI",
+             "YAHOO/RCL",
+             "YAHOO/REGN",
+             "YAHOO/RF",
+             "YAHOO/RHI",
+             "YAHOO/RHT",
+             "YAHOO/RIG",
+             "YAHOO/RL",
+             "YAHOO/ROK",
+             "YAHOO/ROP",
+             "YAHOO/ROST",
+             "YAHOO/RRC",
+             "YAHOO/RSG",
+             "YAHOO/RTN",
+             "YAHOO/SBUX",
+             "YAHOO/SCG",
+             "YAHOO/SCHW",
+             "YAHOO/SE",
+             "YAHOO/SEE",
+             "YAHOO/SHW",
+             "YAHOO/SIG",
+             "YAHOO/SJM",
+             "YAHOO/SLB",
+             "YAHOO/SLG",
+             "YAHOO/SNA",
+             "YAHOO/SNDK",
+             "YAHOO/SNI",
+             "YAHOO/SO",
+             "YAHOO/SPG",
+             "YAHOO/SPLS",
+             "YAHOO/SRCL",
+             "YAHOO/SRE",
+             "YAHOO/STI",
+             "YAHOO/STJ",
+             "YAHOO/STT",
+             "YAHOO/STX",
+             "YAHOO/STZ",
+             "YAHOO/SWK",
+             "YAHOO/SWKS",
+             "YAHOO/SWN",
+             # "YAHOO/SYF", Stock not found.
+             "YAHOO/SYK",
+             "YAHOO/SYMC",
+             "YAHOO/SYY",
+             "YAHOO/T",
+             "YAHOO/TAP",
+             "YAHOO/TDC",
+             "YAHOO/TE",
+             "YAHOO/TEL",
+             # "YAHOO/TGNA", Stock not found.
+             "YAHOO/TGT",
+             "YAHOO/THC",
+             "YAHOO/TIF",
+             "YAHOO/TJX",
+             "YAHOO/TMK",
+             "YAHOO/TMO",
+             "YAHOO/TRIP",
+             "YAHOO/TROW",
+             "YAHOO/TRV",
+             "YAHOO/TSCO",
+             "YAHOO/TSN",
+             "YAHOO/TSO",
+             "YAHOO/TSS",
+             "YAHOO/TWC",
+             "YAHOO/TWX",
+             "YAHOO/TXN",
+             "YAHOO/TXT",
+             "YAHOO/TYC",
+             "YAHOO/UA",
+             "YAHOO/UAL",
+             "YAHOO/UHS",
+             "YAHOO/UNH",
+             # "YAHOO/UNM", Removed due to ugly data.
+             "YAHOO/UNP",
+             "YAHOO/UPS",
+             "YAHOO/URBN",
+             "YAHOO/URI",
+             "YAHOO/USB",
+             "YAHOO/UTX",
+             "YAHOO/V",
+             "YAHOO/VAR",
+             "YAHOO/VFC",
+             "YAHOO/VIAB",
+             "YAHOO/VLO",
+             "YAHOO/VMC",
+             "YAHOO/VNO",
+             "YAHOO/VRSK",
+             "YAHOO/VRSN",
+             "YAHOO/VRTX",
+             "YAHOO/VTR",
+             "YAHOO/VZ",
+             "YAHOO/WAT",
+             # "YAHOO/WBA", Stock not found.
+             "YAHOO/WDC",
+             "YAHOO/WEC",
+             "YAHOO/WFC",
+             "YAHOO/WFM",
+             "YAHOO/WHR",
+             # "YAHOO/WLTW", Stock not found.
+             "YAHOO/WM",
+             "YAHOO/WMB",
+             "YAHOO/WMT",
+             # "YAHOO/WRK", Stock not found.
+             "YAHOO/WU",
+             "YAHOO/WY",
+             "YAHOO/WYN",
+             "YAHOO/WYNN",
+             "YAHOO/XEC",
+             "YAHOO/XEL",
+             "YAHOO/XL",
+             "YAHOO/XLNX",
+             "YAHOO/XOM",
+             "YAHOO/XRAY",
+             "YAHOO/XRX",
+             "YAHOO/XYL",
+             "YAHOO/YHOO",
+             "YAHOO/YUM",
+             # "YAHOO/ZBH", Stock not found.
+             "YAHOO/ZION",
+             "YAHOO/ZTS")
 }
-
-
-
-
-
-
 
 
 
