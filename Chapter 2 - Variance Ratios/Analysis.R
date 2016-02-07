@@ -2,7 +2,7 @@ source(file = "./VarianceRatioTests.R")
 
 
 getPriceData <- function(filename = "jse.csv") {
-  dataset <- read.csv(paste("../Stock Market Datasets/", filename, sep = ''))
+  dataset <- read.csv(filename)
   dates <- as.POSIXct(dataset[ ,"Date"])
   dataset <- dataset[, !(colnames(dataset) %in% c("Date"))]
   return(xts(dataset, order.by = dates))
@@ -15,19 +15,18 @@ getLogPriceData <- function(filename = "jse.csv") {
 }
 
 
-simulateTS <- function(asset.ts, starting = FALSE) {
+simulateTS <- function(asset.ts, stochastic.volatility, starting = FALSE) {
   asset.ts <- na.omit(asset.ts)
-  
-  calibration <- calibrate(asset.ts, 2)
-  mu.est <- calibration[[1]]
-  sd.est <- calibration[[2]]
+  mu.est <- calibrateMu(asset.ts)
+  sd.est <- calibrateSigmaOverlapping(asset.ts)
   
   print(paste(mu.est, sd.est))
   
   if (starting) start <- exp(asset.ts[nrow(asset.ts)][[1]])
   else start = 1.0
 
-  paths <- priceProcesses(n = 700, X0 = start, t = (252), mu = mu.est, rd.sigma = sd.est)
+  paths <- priceProcesses(n = 10000, X0 = start, t = (252 * 3), mu = mu.est, rd.sigma = sd.est, 
+                          stochastic.volatility = stochastic.volatility)
   
   maximum.liklihood <- xts(exp(rowSums(log(paths)) / ncol(paths)), 
                            order.by = as.POSIXct(index(paths)))
@@ -49,13 +48,13 @@ simulateTS <- function(asset.ts, starting = FALSE) {
 }
 
 
-simulateAsset <- function(logPrices, asset.name = "SEPHAKU") {
+simulateAsset <- function(logPrices, stochastic.volatility, asset.name = "SEPHAKU") {
   asset.ts <- logPrices[ ,c(asset.name)]
-  simulateTS(asset.ts)
+  simulateTS(asset.ts, stochastic.volatility)
 }
 
 
-simulatePortfolio <- function(logPrices, asset.names, asset.weights) {
+simulatePortfolio <- function(logPrices, stochastic.volatility, asset.names, asset.weights) {
   asset.ts <- logPrices[ ,c(asset.names[1])] * asset.weights[1]
   
   if (length(asset.names) >= 2) {
@@ -63,18 +62,50 @@ simulatePortfolio <- function(logPrices, asset.names, asset.weights) {
       asset.ts <- asset.ts + logPrices[ ,c(asset.names[i])] * asset.weights[i]
   }
 
-  simulateTS(asset.ts)
+  simulateTS(asset.ts, stochastic.volatility)
 }
 
 
 analysis <- function() {
   logs <- getLogPriceData()
   
-  simulateAsset(logs, "DBX_USA")
-  simulateAsset(logs, "SATRIX_INDI")
-  simulateAsset(logs, "RESILIENT")
-  simulateAsset(logs, "NEWGOLD")
+  z.scores <- c()
+  for (asset.name in colnames(logs)) {
+    logs.asset <- logs[ ,c(asset.name)]
+    logs.asset <- na.omit(logs.asset)
+    logs.asset <- logs.asset[seq(4, length(logs.asset))]
+    if (asset.name == "TREMATON")
+      plot(logs.asset)
+    logs.asset <- as.numeric(as.vector(logs.asset))
+    if (length(logs.asset) > (252 * 5)) {
+      logs.asset.z <- VRTestZScore(logs.asset, 2)
+      if (!is.nan(logs.asset.z)) {
+        z.scores <- c(z.scores, logs.asset.z)
+        print(paste(asset.name, logs.asset.z))
+      }
+    }
+  }
   
-  simulatePortfolio(logs, c("DBX_USA", "SATRIX_INDI", "RESILIENT", "NEWGOLD"), c(0.42, 0.21, 0.16,0.21))
+  print(length(z.scores))
+  
+  # Plot the distribution of random disturbances generated with constant volatility.
+  normal.density <- density(rnorm(length(z.scores)))
+  plot(normal.density, col = rgb(0,0,1,1/4), xlim = c(-8, 15),
+       main = "Comparison of Homoskedastic vs Heteroskedastic Increments")
+  polygon(normal.density, col = rgb(0,0,1,1/4), alpha = 0.3)
+  
+  # Plot the distribution of random disturbances generated with stochastic volatility.
+  real.density <- density(z.scores)
+  lines(real.density, col = rgb(1,0,0,1/4), xlim = c(-8, 15))
+  polygon(real.density, col = rgb(1,0,0,1/4), alpha = 0.3)
+
+  
+#   simulatePortfolio(logs, stochastic.volatility = FALSE, 
+#                     asset.names = c("DBX_USA", "SATRIX_INDI", "RESILIENT", "NEWGOLD"), 
+#                     asset.weights = c(0.42, 0.21, 0.16,0.21))
+#   
+#   simulatePortfolio(logs, stochastic.volatility = TRUE, 
+#                     asset.names = c("DBX_USA", "SATRIX_INDI", "RESILIENT", "NEWGOLD"), 
+#                     asset.weights = c(0.42, 0.21, 0.16,0.21))
 }
 
