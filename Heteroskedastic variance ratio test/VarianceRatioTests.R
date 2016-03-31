@@ -819,10 +819,10 @@ realAssetPriceResults <- function(q, indices, frequency = "daily",
     data[is.infinite(data)] <- NA
     data <- na.omit(data)
     
-    if (length(data) >= (252 * 10)) {
+    if (length(data) >= (252 * 2)) {
       # Subset the data (run on just the last decade)
       if (subset.recent)
-        data <- head(data, (252 * 10))
+        data <- head(data, (252 * 2))
       
       # Simulated similar data for dist comparison.
       mu.est <- calibrateMu(data)
