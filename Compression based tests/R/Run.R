@@ -21,11 +21,12 @@ bin2rawhex <- function(bindata) {
 
 benchmarkData <- function(kDays) {
   bindata <- rbinom(kDays, 1, 0.5)
+  # plotBinData(bindata)
   return(bin2rawhex(bindata))
 }
 
 
-marketData <- function(closes, detrend = FALSE) {
+marketData <- function(closes, detrend = TRUE) {
   if (detrend) {
     logreturns <- Return.calculate(closes, method = "log")
     logreturns <- logreturns - mean(logreturns, na.rm = TRUE)
@@ -40,60 +41,85 @@ marketData <- function(closes, detrend = FALSE) {
   returns[is.infinite(returns)] <- NA
   returns[returns == 0.0] <- NA
   returns <- na.omit(returns)
-  returns[returns > 0] <- 1
-  returns[returns < 0] <- 0
-  return(bin2rawhex(returns))
+  
+  bindata <- returns
+  bindata[bindata > 0] <- 1
+  bindata[bindata < 0] <- 0
+  # plotBinData(bindata)
+  return(bin2rawhex(bindata))
 }
 
 
-compress <- function(x, method = "xz") {
-  # y <- memCompress(x, method)
-  print(length(x))
-  y1 <- brotli_compress(x)
-  y2 <- memCompress(x, type = "gzip")
-  y3 <- memCompress(x, type = "xz")
-  y4 <- memCompress(x, type = "bzip2")
-  cps <- c(length(y1), length(y2), 
-           length(y3), length(y4)) / length(x)
-  return(min(cps))
+plotBinData <- function(bindata) {
+  bindata[bindata == 0] <- -1
+  plot.ts(cumsum(bindata))
 }
 
 
-monteCarloSim <- function(sims = 1000) {
+compress <- function(x, method = "b") {
+  y <- switch(method,
+              g = Rcompression::gzip(x),
+              b = brotli_compress(x))
+  return(length(y) / length(x))
+}
+
+
+monteCarloSim <- function(kDays, sims = 30) {
   benchmarks <- list()
   for (i in 1:sims)
-    benchmarks[[i]] <- benchmarkData()
+    benchmarks[[i]] <- benchmarkData(kDays)
   compressions <- mclapply(benchmarks, compress)
   return(unlist(compressions))
 }
 
 
-run <- function(index = "YAHOO/INDEX_GSPC", years = 5, collapse = "weekly", type = "real") {
-  freq <- switch(collapse,
-                 weekly = 52,
-                 daily = 252)
+run <- function(index = "YAHOO/INDEX_GSPC", years = 5, collapse = "daily", type = "real") {
+  # Download the data from Quandl.com
+  pricedata <- Quandl(index, rows = -1, collapse = collapse, 
+                      end_date = "2015-12-31")
+  # Extract the dates as a POSIX variable.
+  dates <- as.Date(pricedata$"Date")
   
-  pricedata <- Quandl(index, rows = -1, collapse = collapse)
-  closes <- as.xts(pricedata$Close, order.by = as.Date(pricedata$Date))
-  samples.close <- split(closes, ceiling(seq_along(closes) / (freq * years)))
+  # Extract the relevant time series data.
+  if (length(grep("YAHOO", index)) > 0)
+    ts <- as.xts(pricedata$"Adjusted Close", order.by = dates)
+  else if (length(grep("CURRFX", index)) > 0)
+    ts <- as.xts(pricedata$"Rate", order.by = dates)
+  else # Assume we want to use the second column.
+    ts <- as.xts(pricedata[ ,2], order.by = dates)
   
-  if (type == "real") {
-    samples.hex <- lapply(samples.close, marketData)
+  # Get the split positions.
+  pos <- endpoints(ts, on = "years") + 1
+  pos <- pos[seq(1, length(pos) - 1)]
+  
+  # If we have enough sub samples.
+  if (ceiling(length(pos) / years) > 3) {
+    pos <- pos[seq(years, length(pos), years)]
+    ts.subs <- splitAt(ts, pos)
+    ts.subs.dates <- c(index(ts.subs[[1]])[1])
+    for (i in 2:length(ts.subs))
+      ts.subs.dates <- c(ts.subs.dates, index(ts.subs[[i]])[1])
+    ts.hexdata <- lapply(ts.subs, marketData)
+    ts.compressions <- unlist(lapply(ts.hexdata, compress))
+    ts.xts <- xts(ts.compressions[seq(2, length(ts.compressions))], 
+                  order.by = as.Date(ts.subs.dates[seq(2, length(ts.subs.dates))]))
+    plot(ts.xts, main = "Subsequence Compression Ratios")
   } else {
-    samples.sims <- as.list(rep(252 * years, length(samples.close)))
-    samples.hex <- lapply(samples.sims, benchmarkData)
+    print(paste("Compression Achieved:", compress(marketData(ts))))
   }
   
-  samples.comp <- lapply(samples.hex, compress)
-  compressions <- unlist(samples.comp)
-  compressions <- compressions[seq(1, length(compressions) - 1)]
-  years.start <- year(pricedata$Date[length(pricedata$Date)])
-  years.end <- years.start + ((length(compressions) - 1) * years)
-  years.seq <- seq(years.start, years.end, years)
-  years.seq <- as.Date(paste(years.seq, "-01-01", sep = ""))
-  compressions <- xts(compressions, order.by = years.seq)
-  plot(compressions)
-  return(compressions)
+  # Plot the mean compression on random data.
+  mc.means <- c()
+  for (sub in ts.subs)
+    mc.means <- c(mc.means, mean(monteCarloSim(length(sub))))
+  mc.xts <- xts(mc.means[seq(2, length(mc.means))], 
+                order.by = as.Date(ts.subs.dates[seq(2, length(ts.subs.dates))]))
+  lines(mc.xts, col = "red")
+}
+
+
+splitAt <- function(x, pos) {
+  unname(split(x, cumsum(seq_along(x) %in% pos)))
 }
 
 
