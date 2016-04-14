@@ -5,7 +5,27 @@ library(brotli)
 library(ggplot2)
 library(stringr)
 library(plyr)
+library(parallel)
 library(PerformanceAnalytics)
+
+
+testRobustness <- function(sd, t) {
+  signal <- sin(seq(1, t))/50
+  noise <- rnorm(t, mean = 0.0, sd = sd)
+  dates <- seq.Date(Sys.Date(), Sys.Date() + t - 1, 1)
+  simdata <- to.levels(signal + noise)
+  simdata <- xts(simdata, order.by = dates)
+  hexdata <- marketData(simdata, detrend = T)
+  print(compress(hexdata))
+}
+
+
+to.levels <- function(rets) {
+  lseq <- c(1)
+  for (i in 1:length(rets))
+    lseq <- c(lseq, lseq[i - 1] * (1 + rets[i]))
+  return(lseq)
+}
 
 
 bin2rawhex <- function(bindata) {
@@ -56,7 +76,7 @@ plotBinData <- function(bindata) {
 }
 
 
-compress <- function(x, method = "b") {
+compress <- function(x, method = "g") {
   y <- switch(method,
               g = Rcompression::gzip(x),
               b = brotli_compress(x))
