@@ -2,9 +2,18 @@
   <dictionary name="stuart">
     <words>
       <w>autoencoder</w>
+      <w>binarize</w>
+      <w>bindata</w>
+      <w>crossentropy</w>
+      <w>dataframe</w>
+      <w>detrend</w>
       <w>keras</w>
+      <w>logrets</w>
       <w>lstm</w>
+      <w>preprocess</w>
+      <w>rmsprop</w>
       <w>scholes</w>
+      <w>stdev</w>
     </words>
   </dictionary>
 </component>
