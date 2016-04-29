@@ -6,6 +6,8 @@
       <w>bindata</w>
       <w>crossentropy</w>
       <w>dataframe</w>
+      <w>decimations</w>
+      <w>decims</w>
       <w>detrend</w>
       <w>keras</w>
       <w>logrets</w>
@@ -14,6 +16,8 @@
       <w>rmsprop</w>
       <w>scholes</w>
       <w>stdev</w>
+      <w>stdevs</w>
+      <w>stdvs</w>
     </words>
   </dictionary>
 </component>
