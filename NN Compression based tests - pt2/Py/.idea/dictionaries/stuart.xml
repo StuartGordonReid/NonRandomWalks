@@ -1,6 +1,7 @@
 <component name="ProjectDictionaryState">
   <dictionary name="stuart">
     <words>
+      <w>accs</w>
       <w>autoencoder</w>
       <w>binarize</w>
       <w>bindata</w>
@@ -9,6 +10,7 @@
       <w>decimations</w>
       <w>decims</w>
       <w>detrend</w>
+      <w>gspc</w>
       <w>keras</w>
       <w>logrets</w>
       <w>lstm</w>

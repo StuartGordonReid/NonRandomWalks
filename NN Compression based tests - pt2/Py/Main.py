@@ -1,10 +1,9 @@
-import NeuralNetworks
+import numpy
 
+x = ['window size', 'decimation', 'levels', 'dow mean', 'rand mean', 'rand stdev']
 
+for x1 in numpy.repeat("Sim", 10):
+    x.append(str(x1))
 
-def compress_returns():
-    return 1
+print(x)
 
-
-def run():
-    return 1
