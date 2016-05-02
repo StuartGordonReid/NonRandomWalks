@@ -3,10 +3,10 @@ import quandl
 import pandas
 
 
-def get_raw_data(code):
+def get_raw_data(code, start_date="1985-01-01"):
     # Get the raw data from Quandl.
     quandl.ApiConfig.api_key = "t6Rn1d5N1W6Qt4jJq_zC"
-    data = quandl.get(code, collapse='daily')
+    data = quandl.get(code, collapse='daily', start_date=start_date)
     # Return he rate if possible.
     if 'Rate' in data.columns.values:
         return data[['Rate']]
