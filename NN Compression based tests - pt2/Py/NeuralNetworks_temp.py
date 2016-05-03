@@ -55,9 +55,9 @@ def autoencoder(code, ws, dc, sims, max_epochs, activation, seed, layers):
     loss_valid, accuracy_valid = model.evaluate(valid, valid, batch_size=8, verbose=0)
 
     # Compute the same variables on randomly generated data and return everything to the calling function.
-    mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, accs_train, accs_tests, accs_valid = \
+    mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, losses_train, losses_tests, losses_valid = \
         autoencoder_significance(x, ws, sims, max_epochs, activation, seed, layers)
-    return accuracy_train, accuracy_tests, accuracy_valid, mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, accs_train, accs_tests, accs_valid
+    return loss_train, loss_tests, loss_valid, mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, losses_train, losses_tests, losses_valid
 
 
 def autoencoder_significance(x, ws, sims, max_epochs, activation, seed, layers):
@@ -68,9 +68,9 @@ def autoencoder_significance(x, ws, sims, max_epochs, activation, seed, layers):
     l2 = math.floor(l1 * 0.9)
 
     # Track the accuracies of each sim.
-    accs_train = []
-    accs_tests = []
-    accs_valid = []
+    losses_train = []
+    losses_tests = []
+    losses_valid = []
 
     # For number of simulations.
     for j in range(0, sims):
@@ -117,33 +117,33 @@ def autoencoder_significance(x, ws, sims, max_epochs, activation, seed, layers):
 
         # Compute the performance metrics on the training set and append them to the lists.
         loss_train, accuracy_train = model.evaluate(train, train, batch_size=8, verbose=0)
-        accs_train.append(float(accuracy_train))
+        losses_train.append(float(loss_train))
 
         # Compute the performance metrics on the testing set and append them to the list.
         loss_tests, accuracy_tests = model.evaluate(tests, tests, batch_size=8, verbose=0)
-        accs_tests.append(float(accuracy_tests))
+        losses_tests.append(float(loss_tests))
 
         # Compute the performance metrics on the validation set and append them to the list.
         loss_valid, accuracy_valid = model.evaluate(valid, valid, batch_size=8, verbose=0)
-        accs_valid.append(float(accuracy_valid))
+        losses_valid.append(float(loss_valid))
 
     # Convert the lists into numpy arrays.
-    accs_train = numpy.array(accs_train)
-    accs_tests = numpy.array(accs_tests)
-    accs_valid = numpy.array(accs_valid)
+    losses_train = numpy.array(losses_train)
+    losses_tests = numpy.array(losses_tests)
+    losses_valid = numpy.array(losses_valid)
 
     # Compute the averages for significance.
-    mean_train = numpy.mean(accs_train)
-    mean_tests = numpy.mean(accs_tests)
-    mean_valid = numpy.mean(accs_valid)
+    mean_train = numpy.mean(losses_train)
+    mean_tests = numpy.mean(losses_tests)
+    mean_valid = numpy.mean(losses_valid)
 
     # Compute the variance for significance.
-    stdev_train = numpy.std(accs_train)
-    stdev_tests = numpy.std(accs_tests)
-    stdev_valid = numpy.std(accs_valid)
+    stdev_train = numpy.std(losses_train)
+    stdev_tests = numpy.std(losses_tests)
+    stdev_valid = numpy.std(losses_valid)
 
     # Return all of the values to the calling function.
-    return mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, accs_train, accs_tests, accs_valid
+    return mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, losses_train, losses_tests, losses_valid
 
 
 def run_analysis(code, sims, epochs):
@@ -182,7 +182,7 @@ def run_analysis(code, sims, epochs):
         # Write out a temporary file with the results but no headings. Just in case ...
         results_temp = pandas.DataFrame(results)
         results_temp.to_csv(code.replace("YAHOO/", "") +
-                            "_temp_" + str(ws) + ".csv")
+                            "_temp_loss_" + str(ws) + ".csv")
 
     # Print all the information out at the end.
     results_df = pandas.DataFrame(results)
@@ -207,8 +207,8 @@ def run_analysis(code, sims, epochs):
     return results_df
 
 
-# "YAHOO/INDEX_GSPC",
-quandl_codes = ["YAHOO/INDEX_NYA",
+quandl_codes = ["YAHOO/INDEX_GSPC",
+                "YAHOO/INDEX_NYA",
                 "YAHOO/INDEX_GSPTSE",
                 "YAHOO/INDEX_HSI",
                 "YAHOO/INDEX_MID",
@@ -219,7 +219,7 @@ quandl_codes = ["YAHOO/INDEX_NYA",
 
 for qcode in quandl_codes:
     print("-----------------------------------------------------------------")
-    code_results_name = qcode.replace("YAHOO/", "") + "_results.csv"
+    code_results_name = qcode.replace("YAHOO/", "") + "_loss_results.csv"
     code_results = run_analysis(qcode, 60, 4096)
     code_results.to_csv(code_results_name)
 
@@ -232,5 +232,4 @@ for qcode in quandl_codes:
 # # Run the analysis for the S&P 500 stocks index.
 # sp500 = run_analysis('YAHOO/INDEX_GSPC', 150, 1000)
 # sp500.to_csv("results sp500.csv")
-
 
