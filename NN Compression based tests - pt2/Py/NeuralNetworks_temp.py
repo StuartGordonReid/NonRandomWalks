@@ -207,8 +207,8 @@ def run_analysis(code, sims, epochs):
     return results_df
 
 
-quandl_codes = ["YAHOO/INDEX_GSPC",
-                "YAHOO/INDEX_NYA",
+# "YAHOO/INDEX_GSPC",
+quandl_codes = ["YAHOO/INDEX_NYA",
                 "YAHOO/INDEX_GSPTSE",
                 "YAHOO/INDEX_HSI",
                 "YAHOO/INDEX_MID",
