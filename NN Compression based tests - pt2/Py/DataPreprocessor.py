@@ -56,14 +56,25 @@ def window_data(bindata, window_size=20):
     return pandas.DataFrame(windows)
 
 
-def preprocess_data(code, decimation, window_size):
-    # Get raw data, detrend it, binarize it, and window it.
-    return window_data(binarize_data(decimate_data(detrend_data(get_raw_data(code)), decimation)), window_size)
+def split_data(windows):
+    # Split the windows into train, test, and validate.
+    train = numpy.asarray(windows[1:int(len(windows) * 0.8)])
+    valid = numpy.asarray(windows[int(len(windows) * 0.9):len(windows)])
+    tests = numpy.asarray(windows[int(len(windows) * 0.8):int(len(windows) * 0.9)])
+    return train, tests, valid
 
 
-def benchmark_data(n, window_size):
+def get_nn_data(code, dc, ws):
+    # Download the raw binary data from Quandl.
+    bindata = binarize_data(decimate_data(detrend_data(get_raw_data(code)), dc))
+    # Split the binary data into windows of size ws and sets.
+    train, tests, valid = split_data(window_data(bindata, ws))
+    return bindata, train, tests, valid
+
+
+def get_nn_benchmark_data(len_bindata, ws):
     # Generate ne binary digits randomly.
-    ne = int(n / window_size) + window_size
-    bindata = numpy.random.binomial(1, 0.5, ne)
-    # Window the digits and return dataframe.
-    return window_data(bindata, window_size)
+    bindata = numpy.random.binomial(1, 0.5, len_bindata)
+    # Split the binary data into windows of size ws and sets.
+    train, tests, valid = split_data(window_data(bindata, ws))
+    return bindata, train, tests, valid

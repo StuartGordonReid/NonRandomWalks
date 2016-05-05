@@ -1,21 +1,9 @@
 from keras.models import Sequential
 from keras.layers.core import Dense
 from DataPreprocessor import *
-import math
 
 
-def autoencoder(code, ws, dc, sims, max_epochs, activation, seed, layers):
-    print("__Testing real data")
-
-    # Seed the generator so that we have comparable results.
-    numpy.random.seed(seed=seed)
-
-    # Download, preprocess, and split the market data.
-    x = preprocess_data(code, dc, ws)
-    train = numpy.asarray(x[1:int(len(x) * 0.8)])
-    valid = numpy.asarray(x[int(len(x) * 0.9):len(x)])
-    tests = numpy.asarray(x[int(len(x) * 0.8):int(len(x) * 0.9)])
-
+def autoencoder(train, tests, valid, ws, max_epochs, activation, layers):
     # Compute the layer sizes.
     l1 = int(ws * 0.9)
     l2 = int(l1 * 0.9)
@@ -53,183 +41,83 @@ def autoencoder(code, ws, dc, sims, max_epochs, activation, seed, layers):
     loss_train, accuracy_train = model.evaluate(train, train, batch_size=8, verbose=0)
     loss_tests, accuracy_tests = model.evaluate(tests, tests, batch_size=8, verbose=0)
     loss_valid, accuracy_valid = model.evaluate(valid, valid, batch_size=8, verbose=0)
-
-    # Compute the same variables on randomly generated data and return everything to the calling function.
-    mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, losses_train, losses_tests, losses_valid = \
-        autoencoder_significance(x, ws, sims, max_epochs, activation, seed, layers)
-    return loss_train, loss_tests, loss_valid, mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, losses_train, losses_tests, losses_valid
+    return loss_train, accuracy_train, loss_tests, accuracy_tests, loss_valid, accuracy_valid
 
 
-def autoencoder_significance(x, ws, sims, max_epochs, activation, seed, layers):
-    print("__Testing random data.")
+def compression_test(sims, quandl_codes, window_sizes, decimation_levels,
+                     max_epochs=4196, activation='sigmoid', seed=1987, layers=4):
+    # Seed the results for replication ability.
+    numpy.random.seed(seed=seed)
 
-    # Compute the layer sizes.
-    l1 = math.floor(ws * 0.9)
-    l2 = math.floor(l1 * 0.9)
+    loss_function_results = []
+    accuracy_results = []
 
-    # Track the accuracies of each sim.
-    losses_train = []
-    losses_tests = []
-    losses_valid = []
+    names = ['window_meta', 'decimation_meta',
+             'layers_meta', 'seed_meta']
+    for code in quandl_codes:
+        names.extend([code + "_train",
+                      code + "_tests",
+                      code + "_valid"])
 
-    # For number of simulations.
-    for j in range(0, sims):
-        print("____Simulation " + str(j))
+    for r in range(0, sims):
+        names.extend(["sim_" + str(r) + "_train",
+                      "sim_" + str(r) + "_tests",
+                      "sim_" + str(r) + "_valid"])
 
-        # Seed the generator so that our benchmark is different random data for each sim.
-        numpy.random.seed(seed=(seed*(j + 1)))
-
-        # Generate a benchmark data set and split it.
-        x = benchmark_data(x.size, ws)
-        train = numpy.asarray(x[1:int(len(x) * 0.8)])
-        valid = numpy.asarray(x[int(len(x) * 0.9):len(x)])
-        tests = numpy.asarray(x[int(len(x) * 0.8):int(len(x) * 0.9)])
-
-        # Seed the generator again so that we have comparable results.
-        numpy.random.seed(seed=seed)
-
-        # Construct a model.
-        model = Sequential()
-
-        # Add the layers to the network.
-        model.add(Dense(l1, input_dim=ws, activation=activation))
-        if layers == 4:
-            model.add(Dense(l2, input_dim=l1, activation=activation))
-            model.add(Dense(l1, input_dim=l2, activation=activation))
-        model.add(Dense(ws, input_dim=l1, activation=activation))
-
-        # Compile the model using binary crossentropy and rmsprop optimization.
-        model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-
-        # Train the model using early stopping.
-        best_accuracy = -1.0
-        keep_training = True
-        epochs_done = 0
-        while keep_training:
-            epochs_done += 32
-            print("______Epochs done = " + str(epochs_done))
-            model.fit(train, train, batch_size=8, nb_epoch=32, verbose=0)
-            loss_tests, accuracy_tests = model.evaluate(tests, tests, batch_size=16, verbose=0)
-            if accuracy_tests <= best_accuracy or epochs_done >= max_epochs:
-                keep_training = False
-            else:
-                best_accuracy = accuracy_tests
-
-        # Compute the performance metrics on the training set and append them to the lists.
-        loss_train, accuracy_train = model.evaluate(train, train, batch_size=8, verbose=0)
-        losses_train.append(float(loss_train))
-
-        # Compute the performance metrics on the testing set and append them to the list.
-        loss_tests, accuracy_tests = model.evaluate(tests, tests, batch_size=8, verbose=0)
-        losses_tests.append(float(loss_tests))
-
-        # Compute the performance metrics on the validation set and append them to the list.
-        loss_valid, accuracy_valid = model.evaluate(valid, valid, batch_size=8, verbose=0)
-        losses_valid.append(float(loss_valid))
-
-    # Convert the lists into numpy arrays.
-    losses_train = numpy.array(losses_train)
-    losses_tests = numpy.array(losses_tests)
-    losses_valid = numpy.array(losses_valid)
-
-    # Compute the averages for significance.
-    mean_train = numpy.mean(losses_train)
-    mean_tests = numpy.mean(losses_tests)
-    mean_valid = numpy.mean(losses_valid)
-
-    # Compute the variance for significance.
-    stdev_train = numpy.std(losses_train)
-    stdev_tests = numpy.std(losses_tests)
-    stdev_valid = numpy.std(losses_valid)
-
-    # Return all of the values to the calling function.
-    return mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, losses_train, losses_tests, losses_valid
-
-
-def run_analysis(code, sims, epochs):
-    # Set up the tuning parameters for the randomness test.
-    window_sizes = [4, 6, 8, 10, 12, 14, 16, 32]
-    decims = [1, 2, 3, 4, 5]
-    levels = [2, 4]
-    results = []
+    len_bindata = 0
     for ws in window_sizes:
-        for dc in decims:
-            for lv in levels:
-                print(code, "; Window =", str(ws), " Decimation =", str(dc), " Levels =", str(lv))
+        print("Testing window size " + str(ws))
+        for dc in decimation_levels:
+            print("Testing decimation level " + str(dc))
+            this_result_loss = [ws, dc, layers, seed]
+            this_result_accs = [ws, dc, layers, seed]
 
-                # Compute all of the relevant test statistics.
-                acc_train, acc_tests, acc_valid, mean_train, mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid, accs_train, accs_tests, accs_valid \
-                    = autoencoder(code, ws, dc, sims, epochs, 'sigmoid', 1987, lv)
-                this_result = [ws, dc, lv, acc_train, acc_tests, acc_valid, mean_train,
-                               mean_tests, mean_valid, stdev_train, stdev_tests, stdev_valid]
+            # Analyze the market data.
+            for code in quandl_codes:
+                print("__Compressing Market " + code)
+                # Generate the data we need to run the tests.
+                bindata, train, tests, valid = get_nn_data(code, dc, ws)
+                len_bindata = len(bindata)
+                # Compute the results.
+                loss_train, accuracy_train, loss_tests, accuracy_tests, loss_valid, accuracy_valid = \
+                    autoencoder(train, tests, valid, ws, max_epochs, activation, layers)
+                # Add the results to the lists of results.
+                this_result_loss.extend([loss_train, loss_tests, loss_valid])
+                this_result_accs.extend([accuracy_train, accuracy_tests, accuracy_valid])
 
-                # Add each training simulation result to the results vector.
-                for sim_result in accs_train:
-                    this_result.append(sim_result)
+            # Analyze the benchmark random data.
+            for r in range(0, sims):
+                print("__Compression Random Benchmark " + str(r))
+                bindata, train, tests, valid = get_nn_benchmark_data(len_bindata, ws)
+                loss_train, accuracy_train, loss_tests, accuracy_tests, loss_valid, accuracy_valid = \
+                    autoencoder(train, tests, valid, ws, max_epochs, activation, layers)
+                # Add the results to the lists of results.
+                this_result_loss.extend([loss_train, loss_tests, loss_valid])
+                this_result_accs.extend([accuracy_train, accuracy_tests, accuracy_valid])
 
-                # Add each testing simulation result to the results vector.
-                for sim_result in accs_tests:
-                    this_result.append(sim_result)
+            loss_function_results.append(this_result_loss)
+            accuracy_results.append(this_result_accs)
 
-                # Add each validation simulation result to the results vector.
-                for sim_result in accs_valid:
-                    this_result.append(sim_result)
+            # Write out the loss function results at this point in time.
+            loss_df = pandas.DataFrame(loss_function_results)
+            loss_df.columns = names
+            loss_df.to_csv("Loss_hd.csv")
+            loss_df[[col for col in loss_df.columns if "train" in col or "meta" in col]].to_csv("Loss_Train_hd.csv")
+            loss_df[[col for col in loss_df.columns if "tests" in col or "meta" in col]].to_csv("Loss_Tests_hd.csv")
+            loss_df[[col for col in loss_df.columns if "valid" in col or "meta" in col]].to_csv("Loss_Valid_hd.csv")
 
-                # Append the results vector to the set of all results.
-                results.append(this_result)
-                print(this_result)
-
-        # Write out a temporary file with the results but no headings. Just in case ...
-        results_temp = pandas.DataFrame(results)
-        results_temp.to_csv(code.replace("YAHOO/", "") +
-                            "_temp_loss_" + str(ws) + ".csv")
-
-    # Print all the information out at the end.
-    results_df = pandas.DataFrame(results)
-    names = ['window size', 'decimation', 'levels',
-             'market accuracy (train)', 'market accuracy (test)', 'market accuracy (valid)',
-             'random accuracy (train)', 'random accuracy (test)', 'random accuracy (valid)',
-             'random variance (train)', 'random variance (test)', 'random variance (valid)']
-
-    # Add the training results for each simulation.
-    for sim_name in numpy.repeat("Sim Train", sims):
-        names.append(str(sim_name))
-
-    # Add the testing results for each simulation.
-    for sim_name in numpy.repeat("Sim Tests", sims):
-        names.append(str(sim_name))
-
-    # Add the validation results for each simulation.
-    for sim_name in numpy.repeat("Sim Valid", sims):
-        names.append(str(sim_name))
-
-    results_df.columns = names
-    return results_df
+            # Write out the accuracy results at this point in time.
+            accs_df = pandas.DataFrame(accuracy_results)
+            accs_df.columns = names
+            accs_df.to_csv("Accuracy_hd.csv")
+            accs_df[[col for col in accs_df.columns if "train" in col or "meta" in col]].to_csv("Accuracy_Train_hd.csv")
+            accs_df[[col for col in accs_df.columns if "tests" in col or "meta" in col]].to_csv("Accuracy_Tests_hd.csv")
+            accs_df[[col for col in accs_df.columns if "valid" in col or "meta" in col]].to_csv("Accuracy_Valid_hd.csv")
 
 
-# "YAHOO/INDEX_GSPC",
-quandl_codes = ["YAHOO/INDEX_NYA",
-                "YAHOO/INDEX_GSPTSE",
-                "YAHOO/INDEX_HSI",
-                "YAHOO/INDEX_MID",
-                "YAHOO/INDEX_XOI",
-                "YAHOO/INDEX_N225",
-                "YAHOO/INDEX_AORD"]
+ex_windows = list(range(20, 41, 2))
+ex_decimations = list(range(5, 11, 1))
+ex_codes = ["YAHOO/INDEX_NYA", "YAHOO/INDEX_GSPTSE", "YAHOO/INDEX_HSI", "YAHOO/INDEX_MID",
+            "YAHOO/INDEX_XOI", "YAHOO/INDEX_N225", "YAHOO/INDEX_AORD"]
 
-
-for qcode in quandl_codes:
-    print("-----------------------------------------------------------------")
-    code_results_name = qcode.replace("YAHOO/", "") + "_loss_results.csv"
-    code_results = run_analysis(qcode, 60, 4096)
-    code_results.to_csv(code_results_name)
-
-
-# # Run the analysis for the Dow Jones Industrial Average.
-# dow = run_analysis('YAHOO/INDEX_DJI', 150, 1000)
-# dow.to_csv("results djia.csv")
-
-
-# # Run the analysis for the S&P 500 stocks index.
-# sp500 = run_analysis('YAHOO/INDEX_GSPC', 150, 1000)
-# sp500.to_csv("results sp500.csv")
-
+compression_test(150, ex_codes, ex_windows, ex_decimations)
