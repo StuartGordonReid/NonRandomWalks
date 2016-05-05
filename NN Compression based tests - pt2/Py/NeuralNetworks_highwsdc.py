@@ -101,21 +101,21 @@ def compression_test(sims, quandl_codes, window_sizes, decimation_levels,
             # Write out the loss function results at this point in time.
             loss_df = pandas.DataFrame(loss_function_results)
             loss_df.columns = names
-            loss_df.to_csv("Loss_hd.csv")
-            loss_df[[col for col in loss_df.columns if "train" in col or "meta" in col]].to_csv("Loss_Train_hd.csv")
-            loss_df[[col for col in loss_df.columns if "tests" in col or "meta" in col]].to_csv("Loss_Tests_hd.csv")
-            loss_df[[col for col in loss_df.columns if "valid" in col or "meta" in col]].to_csv("Loss_Valid_hd.csv")
+            loss_df.to_csv("Loss_hwsdc.csv")
+            loss_df[[col for col in loss_df.columns if "train" in col or "meta" in col]].to_csv("Loss_Train_hwsdc.csv")
+            loss_df[[col for col in loss_df.columns if "tests" in col or "meta" in col]].to_csv("Loss_Tests_hwsdc.csv")
+            loss_df[[col for col in loss_df.columns if "valid" in col or "meta" in col]].to_csv("Loss_Valid_hwsdc.csv")
 
             # Write out the accuracy results at this point in time.
             accs_df = pandas.DataFrame(accuracy_results)
             accs_df.columns = names
-            accs_df.to_csv("Accuracy_hd.csv")
-            accs_df[[col for col in accs_df.columns if "train" in col or "meta" in col]].to_csv("Accuracy_Train_hd.csv")
-            accs_df[[col for col in accs_df.columns if "tests" in col or "meta" in col]].to_csv("Accuracy_Tests_hd.csv")
-            accs_df[[col for col in accs_df.columns if "valid" in col or "meta" in col]].to_csv("Accuracy_Valid_hd.csv")
+            accs_df.to_csv("Accuracy_hwsdc.csv")
+            accs_df[[col for col in accs_df.columns if "train" in col or "meta" in col]].to_csv("Accuracy_Train_hwsdc.csv")
+            accs_df[[col for col in accs_df.columns if "tests" in col or "meta" in col]].to_csv("Accuracy_Tests_hwsdc.csv")
+            accs_df[[col for col in accs_df.columns if "valid" in col or "meta" in col]].to_csv("Accuracy_Valid_hwsdc.csv")
 
 
-ex_windows = list(range(20, 41, 2))
+ex_windows = list(range(20, 260, 10))
 ex_decimations = list(range(5, 11, 1))
 ex_codes = ["YAHOO/INDEX_NYA", "YAHOO/INDEX_GSPTSE", "YAHOO/INDEX_HSI", "YAHOO/INDEX_MID",
             "YAHOO/INDEX_XOI", "YAHOO/INDEX_N225", "YAHOO/INDEX_AORD"]
