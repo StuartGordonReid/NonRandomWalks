@@ -4,7 +4,7 @@ from keras.regularizers import l1, l2, l1l2
 from DataPreprocessor import *
 
 
-def autoencoder(train, tests, valid, ws, compression_rate, max_epochs, activation, sparcity):
+def autoencoder(train, tests, valid, ws, compression_rate, max_epochs, activation, sparcity, optimizer):
     # Compute the layer sizes.
     layer1 = int(ws * compression_rate)
     layer2 = int(layer1 * compression_rate)
@@ -26,7 +26,7 @@ def autoencoder(train, tests, valid, ws, compression_rate, max_epochs, activatio
     model.add(Dense(ws, input_dim=layer1, activation=activation, W_regularizer=regular))
 
     # Compile the model using binary crossentropy and rmsprop optimization.
-    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     # Train the model using early stopping.
     best_accuracy = -1.0
@@ -48,11 +48,12 @@ def autoencoder(train, tests, valid, ws, compression_rate, max_epochs, activatio
     loss_train, accuracy_train = model.evaluate(train, train, batch_size=1, verbose=0)
     loss_tests, accuracy_tests = model.evaluate(tests, tests, batch_size=1, verbose=0)
     loss_valid, accuracy_valid = model.evaluate(valid, valid, batch_size=1, verbose=0)
+    print("____" + str(loss_train) + ";" + str(loss_tests) + ";" + str(loss_valid))
     return loss_train, loss_tests, loss_valid
 
 
 def compression_test(sims, quandl_codes, window_sizes, decimation_levels, compression_rate,
-                     activation, sparcity, prefix_name, max_epochs=2000, seed=1987):
+                     activation, sparcity, optimizer, prefix_name, max_epochs=2000, seed=1987):
     # Seed the results for replication ability.
     numpy.random.seed(seed=seed)
     loss_function_results = []
@@ -82,7 +83,7 @@ def compression_test(sims, quandl_codes, window_sizes, decimation_levels, compre
                 len_bindata = len(bindata)
                 # Compute the results.
                 loss_train, loss_tests, loss_valid = autoencoder(train, tests, valid, ws, compression_rate,
-                                                                 max_epochs, activation, sparcity)
+                                                                 max_epochs, activation, sparcity, optimizer)
                 # Add the results to the lists of results.
                 this_result_loss.extend([loss_train, loss_tests, loss_valid])
 
@@ -91,7 +92,7 @@ def compression_test(sims, quandl_codes, window_sizes, decimation_levels, compre
                 print("__Compression Random Benchmark " + str(r))
                 bindata, train, tests, valid = get_nn_benchmark_data(len_bindata, ws)
                 loss_train, loss_tests, loss_valid = autoencoder(train, tests, valid, ws, compression_rate,
-                                                                 max_epochs, activation, sparcity)
+                                                                 max_epochs, activation, sparcity, optimizer)
                 # Add the results to the lists of results.
                 this_result_loss.extend([loss_train, loss_tests, loss_valid])
 

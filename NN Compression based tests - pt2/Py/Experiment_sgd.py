@@ -11,13 +11,12 @@ decimations.extend(list(range(10, 20, 2)))
 codes = ["YAHOO/INDEX_NYA", "YAHOO/INDEX_GSPTSE", "YAHOO/INDEX_HSI", "YAHOO/INDEX_MID",
          "YAHOO/INDEX_XOI", "YAHOO/INDEX_N225", "YAHOO/INDEX_AORD"]
 
-print(len(windows) * len(decimations))
-
 compression_test(sims=35,
                  quandl_codes=codes,
                  window_sizes=windows,
                  decimation_levels=decimations,
                  compression_rate=0.86,
-                 activation='sigmoid',
-                 sparcity='l2',
-                 prefix_name='arch5')
+                 activation='hard_sigmoid',
+                 optimizer='sgd',
+                 sparcity='l0',
+                 prefix_name='sgd')
