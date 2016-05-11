@@ -38,8 +38,8 @@ def decimate_data(logrets, decimation):
     if decimation >= 2:
         logrets = numpy.squeeze(numpy.array(logrets))
         decimated_logrets = []
-        for i in range(0, len(logrets) - int(decimation / 2), decimation):
-            decimated_logrets.append(logrets[i] + logrets[i + 1])
+        for i in range(0, len(logrets) - decimation + 1, decimation):
+            decimated_logrets.append(numpy.sum(numpy.array(logrets[i:(i + decimation)])))
         return numpy.array(decimated_logrets)
     else:
         return numpy.array(logrets)
