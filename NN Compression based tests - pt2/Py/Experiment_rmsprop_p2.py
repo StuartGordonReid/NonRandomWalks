@@ -21,5 +21,5 @@ compression_test(sims=35,
                  activation='sigmoid',
                  optimizer='RMSprop',
                  sparcity='l0',
-                 prefix_name='rmsprop_p1',
+                 prefix_name='rmsprop_p2',
                  max_epochs=2000)
