@@ -20,6 +20,6 @@ compression_test(sims=35,
                  compression_rate=0.86,
                  activation='sigmoid',
                  optimizer='RMSprop',
-                 sparcity='l0',
+                 sparcity='l2',
                  prefix_name='rmsprop_p2',
                  max_epochs=2000)

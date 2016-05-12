@@ -14,9 +14,9 @@ def autoencoder(train, tests, valid, ws, compression_rate, max_epochs, activatio
     # Print out the shape of the autoencoder
     print("____Architecture: ",
           str(ws), "->",
-          str(layer1), "->",
+          # str(layer1), "->",
           str(layer2), "->",
-          str(layer1), "->",
+          # str(layer1), "->",
           str(ws))
 
     # Construct a Keras model.
@@ -30,10 +30,10 @@ def autoencoder(train, tests, valid, ws, compression_rate, max_epochs, activatio
         regular = l1l2()
 
     # Add the first set of connections to the network
-    model.add(Dense(layer1, input_dim=ws, activation=activation, W_regularizer=regular))
-    model.add(Dense(layer2, input_dim=layer1, activation=activation, W_regularizer=regular))
-    model.add(Dense(layer1, input_dim=layer2, activation=activation, W_regularizer=regular))
-    model.add(Dense(ws, input_dim=layer1, activation=activation, W_regularizer=regular))
+    model.add(Dense(layer2, input_dim=ws, activation=activation, W_regularizer=regular))
+    # model.add(Dense(layer2, input_dim=layer1, activation=activation, W_regularizer=regular))
+    # model.add(Dense(layer1, input_dim=layer2, activation=activation, W_regularizer=regular))
+    model.add(Dense(ws, input_dim=layer2, activation=activation, W_regularizer=regular))
 
     if optimizer == "sgd-momentum":
         optimizer = sgd(nesterov=True)
@@ -53,7 +53,8 @@ def autoencoder(train, tests, valid, ws, compression_rate, max_epochs, activatio
         model.fit(train, train, batch_size=32, nb_epoch=5, verbose=0)
         loss_tests, accuracy_tests = model.evaluate(tests, tests, batch_size=32, verbose=0)
         # If the accuracy deteriorates or the epochs done exceeds the max epochs stop training.
-        if loss_tests > best_loss or epochs_done >= max_epochs:
+        # if loss_tests > best_loss or epochs_done >= max_epochs:
+        if epochs_done >= max_epochs:
             keep_training = False
         else:
             best_loss = loss_tests
