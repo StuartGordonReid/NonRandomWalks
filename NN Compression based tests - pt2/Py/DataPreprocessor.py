@@ -1,36 +1,57 @@
+import time
 import numpy
-import random
 import quandl
 import pandas
+import random
+from random import shuffle
 
 
-def get_raw_data(code, start_date="1985-01-01", end_date="2016-01-01"):
+def get_raw_data(code, start_date="1985-01-01", end_date="2016-01-01", collapse="daily"):
     # Get the raw data from Quandl.
     try:
         quandl.ApiConfig.api_key = "t6Rn1d5N1W6Qt4jJq_zC"
-        data = quandl.get(code, collapse='daily', start_date=start_date, end_date=end_date)
+        data = quandl.get(code,
+                          collapse=collapse,
+                          start_date=start_date,
+                          end_date=end_date)
         # Return he rate if possible.
         if 'Rate' in data.columns.values:
             return data[['Rate']]
         # Otherwise return the adjusted close.
         elif 'Adjusted Close' in data.columns.values:
             return data[['Adjusted Close']]
-        # Lastly return the close.
-        return data[['Close']]
+        # Otherwise return the close.
+        elif 'Close' in data.columns.values:
+            return data[['Close']]
+        # Lastly return a generic "Value"
+        return data[['Value']]
     except Exception:
         print("__Waiting ...")
-        i = random.uniform(0, 1000001)
-        while i < 1000000:
-            i = random.uniform(0, 1000001)
+        time.sleep(30)  # Sleep for 30 seconds
         print("__Trying again ...")
         return get_raw_data(code, start_date)
 
 
-def detrend_data(data):
+def log_returns(data, long_ws=120):
     # Lag the dataframe by one day for computing the log returns.
     data_lagged = pandas.DataFrame.shift(data, periods=1, freq=None, axis=0)
-    logrets = numpy.log(data.ix[2:] / data_lagged.ix[2:])
-    # Remove the drift component from the returns.
+    logrets = numpy.squeeze(numpy.array(numpy.log(data.ix[2:] / data_lagged.ix[2:])))
+    return logrets[0:(len(logrets) - (len(logrets) % long_ws) + 1)]
+
+
+def shuffle_data(data, long_ws=120):
+    logrets = list(log_returns(data, long_ws))
+    shuffled_logrets = []
+    for t in range(long_ws, len(logrets), long_ws):
+        subsequence = logrets[(t - long_ws):t]
+        shuffle(subsequence)
+        shuffled_logrets.extend(subsequence)
+    return numpy.array(shuffled_logrets)
+
+
+def detrend_data(data):
+    logrets = log_returns(data)
+    # Remove drift from the returns.
     return logrets - numpy.mean(logrets)
 
 
@@ -73,7 +94,14 @@ def split_data(windows):
     return train, tests, valid
 
 
-def get_nn_data(code, dc, ws):
+def split_data_2(windows):
+    # Split the windows into train, test, and validate.
+    train = numpy.asarray(windows[1:int(len(windows) * 0.8)])
+    tests = numpy.asarray(windows[int(len(windows) * 0.8):len(windows)])
+    return train, tests
+
+
+def get_nn_data_binary(code, dc, ws):
     # Download the raw binary data from Quandl.
     bindata = binarize_data(decimate_data(detrend_data(get_raw_data(code)), dc))
     # Split the binary data into windows of size ws and sets.
@@ -81,9 +109,25 @@ def get_nn_data(code, dc, ws):
     return bindata, train, tests, valid
 
 
-def get_nn_benchmark_data(len_bindata, ws):
+def get_nn_benchmark_data_binary(len_bindata, ws):
     # Generate ne binary digits randomly.
     bindata = numpy.random.binomial(1, 0.5, len_bindata)
     # Split the binary data into windows of size ws and sets.
     train, tests, valid = split_data(window_data(bindata, ws))
     return bindata, train, tests, valid
+
+
+def get_nn_data_real(code, ws, start_date, end_date, collapse):
+    realdata = log_returns(get_raw_data(code, start_date, end_date, collapse))
+    train, tests, valid = split_data(window_data(realdata, ws))
+    return realdata, train, tests, valid
+
+
+def get_nn_benchmark_data_real(code, ws, start_date, end_date, collapse):
+    if collapse == 'daily':
+        long_ws = 120
+    else:
+        long_ws = 24
+    realdata = shuffle_data(get_raw_data(code, start_date, end_date, collapse), long_ws=long_ws)
+    train, tests, valid = split_data(window_data(realdata, ws))
+    return realdata, train, tests, valid

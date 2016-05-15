@@ -19,6 +19,7 @@
       <w>lstm</w>
       <w>preprocess</w>
       <w>qcode</w>
+      <w>realdata</w>
       <w>regularizer</w>
       <w>rmsprop</w>
       <w>scholes</w>
@@ -27,6 +28,8 @@
       <w>stdev</w>
       <w>stdevs</w>
       <w>stdvs</w>
+      <w>subsequence</w>
+      <w>tanh</w>
     </words>
   </dictionary>
 </component>
