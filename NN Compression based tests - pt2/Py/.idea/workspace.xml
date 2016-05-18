@@ -21,21 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="DataPreprocessor.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/DataPreprocessor.py">
+      <file leaf-file-name="Fetcher.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Fetcher.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="1" column="12" selection-start-line="1" selection-start-column="12" selection-end-line="1" selection-end-column="12" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NNCompressorReal.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/NNCompressorReal.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="40" column="57" selection-start-line="40" selection-start-column="57" selection-end-line="40" selection-end-column="57" />
+              <caret line="28" column="33" selection-start-line="28" selection-start-column="33" selection-end-line="28" selection-end-column="33" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -43,41 +33,63 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Experiment_indices.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Real/Experiment_indices.py">
+      <file leaf-file-name="Compressor.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Compressor.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="9" column="33" selection-start-line="9" selection-start-column="33" selection-end-line="9" selection-end-column="33" />
+              <caret line="136" column="63" selection-start-line="136" selection-start-column="63" selection-end-line="136" selection-end-column="63" />
+              <folding>
+                <element signature="e#0#21#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ScriptA.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ScriptA.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Experiment_currencies.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Real/Experiment_currencies.py">
+      <file leaf-file-name="ScriptB.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ScriptB.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="13" column="28" selection-start-line="13" selection-start-column="28" selection-end-line="13" selection-end-column="28" />
+              <caret line="7" column="34" selection-start-line="7" selection-start-column="34" selection-end-line="7" selection-end-column="34" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Experiment_stocks_part2.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part2.py">
+      <file leaf-file-name="ScriptC.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ScriptC.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
+              <caret line="6" column="34" selection-start-line="6" selection-start-column="34" selection-end-line="6" selection-end-column="34" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Experiment_stocks_part3.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part3.py">
+      <file leaf-file-name="ScriptD.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ScriptD.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.40677965">
-              <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="7" column="34" selection-start-line="7" selection-start-column="34" selection-end-line="7" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ScriptE.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ScriptE.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.37288135">
+              <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -95,27 +107,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Experiment_adadelta_p1.py" />
-        <option value="$PROJECT_DIR$/Testing.py" />
-        <option value="$PROJECT_DIR$/SimpleUnitTests.py" />
-        <option value="$PROJECT_DIR$/Experiment_adam_p1.py" />
-        <option value="$PROJECT_DIR$/Experiment_adam_p2.py" />
-        <option value="$PROJECT_DIR$/Experiment_adam_p3.py" />
-        <option value="$PROJECT_DIR$/Experiment_adam_p4.py" />
-        <option value="$PROJECT_DIR$/Experiment_adam_p5.py" />
-        <option value="$PROJECT_DIR$/Experiment_adam_p6.py" />
-        <option value="$PROJECT_DIR$/NeuralNetCompressor.py" />
-        <option value="$PROJECT_DIR$/Experiment_rmsprop_p1.py" />
-        <option value="$PROJECT_DIR$/Experiment_rmsprop_p2.py" />
-        <option value="$PROJECT_DIR$/Experiment_rmsprop_p3.py" />
-        <option value="$PROJECT_DIR$/Experiment_rmsprop_p4.py" />
-        <option value="$PROJECT_DIR$/Experiment_rmsprop_p5.py" />
-        <option value="$PROJECT_DIR$/Experiment_rmsprop_p6.py" />
-        <option value="$PROJECT_DIR$/FloatingNNCompressor.py" />
-        <option value="$PROJECT_DIR$/NNCompressorBinary.py" />
-        <option value="$PROJECT_DIR$/Experiments v2/Experiment_sgd.py" />
-        <option value="$PROJECT_DIR$/Experiments v2/Experiment_adadelta.py" />
-        <option value="$PROJECT_DIR$/Temp.py" />
         <option value="$PROJECT_DIR$/ShuffleComparison.py" />
         <option value="$PROJECT_DIR$/Experiments v2/Experiment_nya.py" />
         <option value="$PROJECT_DIR$/Experiments v2/Experiment_aord.py" />
@@ -134,13 +125,39 @@
         <option value="$PROJECT_DIR$/Real/Experiment_Currencies.py" />
         <option value="$PROJECT_DIR$/Real/Experiment_oldstocks.py" />
         <option value="$PROJECT_DIR$/Real/Experiment_stocks.py" />
-        <option value="$PROJECT_DIR$/NNCompressorReal.py" />
-        <option value="$PROJECT_DIR$/Real/Experiment_stocks_part1.py" />
-        <option value="$PROJECT_DIR$/DataPreprocessor.py" />
         <option value="$PROJECT_DIR$/Real/Experiment_indices.py" />
         <option value="$PROJECT_DIR$/Real/Experiment_currencies.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_stocks_part1.py" />
         <option value="$PROJECT_DIR$/Real/Experiment_stocks_part2.py" />
         <option value="$PROJECT_DIR$/Real/Experiment_stocks_part3.py" />
+        <option value="$PROJECT_DIR$/NNCompressorRealv2.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_indices_v2.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_indices_p2.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_indices_p3.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_currencies_p1.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_currencies_p2.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_currencies_p3.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_currencies_p4.py" />
+        <option value="$PROJECT_DIR$/Real/Experiment_indices_p1.py" />
+        <option value="$PROJECT_DIR$/Real/Temp.py" />
+        <option value="$PROJECT_DIR$/DataPreprocessor.py" />
+        <option value="$PROJECT_DIR$/NNCompressorReal.py" />
+        <option value="$PROJECT_DIR$/Real/ExperimentA.py" />
+        <option value="$PROJECT_DIR$/Real/ExperimentB.py" />
+        <option value="$PROJECT_DIR$/Real/ExperimentC.py" />
+        <option value="$PROJECT_DIR$/Real/ExperimentD.py" />
+        <option value="$PROJECT_DIR$/Real/ExperimentE.py" />
+        <option value="$PROJECT_DIR$/Real/ExperimentF.py" />
+        <option value="$PROJECT_DIR$/Real/ExperimentG.py" />
+        <option value="$PROJECT_DIR$/Analysis.py" />
+        <option value="$PROJECT_DIR$/Fetcher.py" />
+        <option value="$PROJECT_DIR$/Compressor.py" />
+        <option value="$PROJECT_DIR$/ScriptF.py" />
+        <option value="$PROJECT_DIR$/ScriptB.py" />
+        <option value="$PROJECT_DIR$/ScriptA.py" />
+        <option value="$PROJECT_DIR$/ScriptC.py" />
+        <option value="$PROJECT_DIR$/ScriptD.py" />
+        <option value="$PROJECT_DIR$/ScriptE.py" />
       </list>
     </option>
   </component>
@@ -195,106 +212,98 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Py" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Py" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Real" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
     </panes>
   </component>
-  <component name="RunManager" selected="Python.Experiment_stocks_part3">
-    <configuration default="false" name="Experiment_indices" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Real" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.ScriptE">
+    <configuration default="false" name="ScriptA" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Real" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Real/Experiment_indices.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ScriptA.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="Experiment_currencies" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration default="false" name="ScriptB" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Real" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Real/Experiment_currencies.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ScriptB.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="Experiment_stocks_part1" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration default="false" name="ScriptC" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Real" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Real/Experiment_stocks_part1.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ScriptC.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="Experiment_stocks_part2" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration default="false" name="ScriptD" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Real" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Real/Experiment_stocks_part2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ScriptD.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="Experiment_stocks_part3" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration default="false" name="ScriptE" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Real" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Real/Experiment_stocks_part3.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ScriptE.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -422,19 +431,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.Experiment_indices" />
-      <item index="1" class="java.lang.String" itemvalue="Python.Experiment_currencies" />
-      <item index="2" class="java.lang.String" itemvalue="Python.Experiment_stocks_part1" />
-      <item index="3" class="java.lang.String" itemvalue="Python.Experiment_stocks_part2" />
-      <item index="4" class="java.lang.String" itemvalue="Python.Experiment_stocks_part3" />
+      <item index="0" class="java.lang.String" itemvalue="Python.ScriptA" />
+      <item index="1" class="java.lang.String" itemvalue="Python.ScriptB" />
+      <item index="2" class="java.lang.String" itemvalue="Python.ScriptC" />
+      <item index="3" class="java.lang.String" itemvalue="Python.ScriptD" />
+      <item index="4" class="java.lang.String" itemvalue="Python.ScriptE" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.Experiment_stocks_part3" />
-        <item index="1" class="java.lang.String" itemvalue="Python.Experiment_stocks_part2" />
-        <item index="2" class="java.lang.String" itemvalue="Python.Experiment_currencies" />
-        <item index="3" class="java.lang.String" itemvalue="Python.Experiment_indices" />
-        <item index="4" class="java.lang.String" itemvalue="Python.Experiment_stocks_part1" />
+        <item index="0" class="java.lang.String" itemvalue="Python.ScriptE" />
+        <item index="1" class="java.lang.String" itemvalue="Python.ScriptD" />
+        <item index="2" class="java.lang.String" itemvalue="Python.ScriptC" />
+        <item index="3" class="java.lang.String" itemvalue="Python.ScriptB" />
+        <item index="4" class="java.lang.String" itemvalue="Python.ScriptA" />
       </list>
     </recent_temporary>
   </component>
@@ -455,7 +464,7 @@
     <frame x="65" y="-1084" width="1855" height="1084" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16981132" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16981132" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -509,148 +518,62 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/NNCompressorReal.py">
+    <entry file="file://$PROJECT_DIR$/Fetcher.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="30" selection-start-line="6" selection-start-column="30" selection-end-line="6" selection-end-column="30" />
+          <caret line="28" column="33" selection-start-line="28" selection-start-column="33" selection-end-line="28" selection-end-column="33" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_indices.py">
+    <entry file="file://$PROJECT_DIR$/Compressor.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ShuffleComparison.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_currencies.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="68" selection-start-line="6" selection-start-column="68" selection-end-line="6" selection-end-column="68" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="0" selection-start-line="22" selection-start-column="41" selection-end-line="22" selection-end-column="53" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="25" selection-start-line="22" selection-start-column="30" selection-end-line="22" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="0" selection-start-line="22" selection-start-column="30" selection-end-line="22" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SimpleUnitTests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.17408124">
-          <caret line="5" column="39" selection-start-line="5" selection-start-column="39" selection-end-line="5" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Binary/Experiment_rmsprop_p1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.27852997">
-          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="9" selection-end-column="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ShuffleComparison.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.018907564">
-          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NNCompressorBinary.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.018907564">
-          <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.18907563">
-          <caret line="16" column="32" selection-start-line="16" selection-start-column="32" selection-end-line="16" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DataPreprocessor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="1" column="12" selection-start-line="1" selection-start-column="12" selection-end-line="1" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NNCompressorReal.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="40" column="57" selection-start-line="40" selection-start-column="57" selection-end-line="40" selection-end-column="57" />
+          <caret line="136" column="63" selection-start-line="136" selection-start-column="63" selection-end-line="136" selection-end-column="63" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_indices.py">
+    <entry file="file://$PROJECT_DIR$/ScriptA.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="33" selection-start-line="9" selection-start-column="33" selection-end-line="9" selection-end-column="33" />
+          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_currencies.py">
+    <entry file="file://$PROJECT_DIR$/ScriptB.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="28" selection-start-line="13" selection-start-column="28" selection-end-line="13" selection-end-column="28" />
+          <caret line="7" column="34" selection-start-line="7" selection-start-column="34" selection-end-line="7" selection-end-column="34" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part2.py">
+    <entry file="file://$PROJECT_DIR$/ScriptC.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
+          <caret line="6" column="34" selection-start-line="6" selection-start-column="34" selection-end-line="6" selection-end-column="34" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Real/Experiment_stocks_part3.py">
+    <entry file="file://$PROJECT_DIR$/ScriptD.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.40677965">
-          <caret line="12" column="29" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="34" selection-start-line="7" selection-start-column="34" selection-end-line="7" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ScriptE.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.37288135">
+          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
           <folding />
         </state>
       </provider>

@@ -2,6 +2,7 @@
   <dictionary name="stuart">
     <words>
       <w>accs</w>
+      <w>actuals</w>
       <w>aord</w>
       <w>autoencoder</w>
       <w>binarize</w>
@@ -16,11 +17,14 @@
       <w>gsptse</w>
       <w>keras</w>
       <w>logrets</w>
+      <w>logreturns</w>
       <w>lstm</w>
+      <w>maxdiff</w>
       <w>preprocess</w>
       <w>qcode</w>
       <w>realdata</w>
       <w>regularizer</w>
+      <w>relu</w>
       <w>rmsprop</w>
       <w>scholes</w>
       <w>sparcity</w>
