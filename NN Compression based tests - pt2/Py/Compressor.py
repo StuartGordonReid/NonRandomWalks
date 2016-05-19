@@ -18,13 +18,13 @@ def logrets_to_prices(returns):
     return numpy.array(prices)
 
 
-def prices_to_logrets(data, long_ws=120):
+def prices_to_logrets(data, long_ws=180):
     data_lagged = pandas.DataFrame.shift(data, periods=1, freq=None, axis=0)
     logrets = numpy.squeeze(numpy.array(numpy.log(data.ix[2:] / data_lagged.ix[2:])))
     return logrets[0:(len(logrets) - (len(logrets) % long_ws))]
 
 
-def shuffle_logrets(logrets, long_ws=120):
+def shuffle_logrets(logrets, long_ws=180):
     shuffled_logrets = []
     for t in range(long_ws, len(logrets) + 1, long_ws):
         subsequence = logrets[(t - long_ws):t]
@@ -35,7 +35,7 @@ def shuffle_logrets(logrets, long_ws=120):
 
 def logrets_to_inputs(logrets):
     logrets = -logrets
-    logrets *= 10
+    logrets *= 20
     inputs = numpy.exp(logrets)
     inputs += 1
     return numpy.array(1 / inputs)
@@ -45,7 +45,7 @@ def inputs_to_logrets(inputs):
     logrets = 1 / inputs
     logrets -= 1
     logrets = numpy.log(logrets)
-    logrets /= 10
+    logrets /= 20
     return numpy.array(-logrets)
 
 
@@ -123,7 +123,7 @@ def get_stats(train, train_reconstructed, valid, valid_reconstructed, show_plots
     return [sse, sae, mse, mae]
 
 
-def seed_and_discard(discards=4095):
+def seed_and_discard(discards=1024):
     numpy.random.seed(0)
     random.seed(0)
     for i in range(0, discards):
@@ -140,12 +140,12 @@ def write_results(outs, file_out):
 
 
 def run_compression(codes, simulations, file_out):
+    seed_and_discard()
     outs = []
     for code in codes:
-        seed_and_discard()
         for sim in range(0, simulations):
             do_shuffle = True if sim > 0 else False
             outs.append(get_result(tf_autoencoder, code, "1995-01-01", "2016-01-01",
-                                   "daily", do_shuffle, 20, 10, 12000, 128, "mse", "adam"))
+                                   "daily", do_shuffle, 20, 10, 8000, 64, "mse", "adam"))
             write_results(outs, file_out)
 

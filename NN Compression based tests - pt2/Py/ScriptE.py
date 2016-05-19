@@ -8,4 +8,4 @@ quandl_codes = ["YAHOO/INDEX_AEX",
                 "YAHOO/INDEX_BVSP",
                 "YAHOO/INDEX_MXY"]
 
-run_compression(quandl_codes, 100, "Compression Results E.csv")
+run_compression(quandl_codes, 500, "Compression Results E.csv")
